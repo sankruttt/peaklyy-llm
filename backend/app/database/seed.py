@@ -142,10 +142,27 @@ INITIAL_GIGS = [
     }
 ]
 
+from app.models.user import User
+from app.core.security import hash_password
+
 def seed_database(db: Session):
     """
-    Seeds initial gigs in PostgreSQL if the table is empty.
+    Seeds initial gigs and default demo user in PostgreSQL if tables are empty.
     """
+    # 1. Seed Demo User
+    demo_user = db.query(User).filter(User.email == "alex.mercer@example.com").first()
+    if not demo_user:
+        logger.info("Seeding default demo user alex.mercer@example.com...")
+        user = User(
+            name="Alex Mercer",
+            email="alex.mercer@example.com",
+            hashed_password=hash_password("password123")
+        )
+        db.add(user)
+        db.commit()
+        logger.info("Demo user alex.mercer@example.com seeded successfully.")
+
+    # 2. Seed Initial Gigs
     existing_count = db.query(Gig).count()
     if existing_count == 0:
         logger.info("Seeding initial database gigs across all 9 categories...")
