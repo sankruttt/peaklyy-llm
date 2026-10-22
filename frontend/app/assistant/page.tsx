@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../services/api";
 import { ChatConversation, ChatMessage } from "../../types";
+import { calculateResumeScore } from "../../utils/scoring";
 
 function AssistantContent() {
   const router = useRouter();
@@ -22,6 +23,7 @@ function AssistantContent() {
   const [loading, setLoading] = useState(false);
   const [hasResume, setHasResume] = useState(false);
   const [latestResumeName, setLatestResumeName] = useState<string>("alex_mercer.pdf");
+  const [resumeScore, setResumeScore] = useState<number>(0);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -47,6 +49,9 @@ function AssistantContent() {
       setHasResume(resumes.length > 0);
       if (resumes.length > 0) {
         setLatestResumeName(resumes[0].file_name);
+        if (resumes[0].ai_profile) {
+          setResumeScore(calculateResumeScore(resumes[0].ai_profile));
+        }
       }
 
       if (convs.length > 0) {
@@ -215,7 +220,9 @@ function AssistantContent() {
             <div className="p-3 rounded bg-[#201f22] border border-[#353437] space-y-1.5">
               <div className="flex items-center justify-between text-xs font-mono-telemetry">
                 <span className="text-[#e5e1e4] font-bold">{user?.name || "Alex Mercer"}</span>
-                <span className="text-emerald-400 font-bold">92 PTS</span>
+                <span className="text-emerald-400 font-bold">
+                  {resumeScore > 0 ? `${resumeScore} PTS` : "--"}
+                </span>
               </div>
               <div className="text-[10px] font-mono-telemetry text-[#8e8c90] truncate">
                 CONTEXT: {latestResumeName}

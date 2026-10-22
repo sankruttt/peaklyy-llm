@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
 import { api } from "../../../services/api";
 import { Resume, AIResumeProfile } from "../../../types";
+import { calculateResumeScore, getScoreRating } from "../../../utils/scoring";
 
 type TabType = "summary" | "skills" | "strengths" | "experience";
 
@@ -97,8 +98,9 @@ function ResumeAnalysisContent() {
     (profile?.skills?.frameworks?.length || 0) +
     (profile?.skills?.databases?.length || 0);
 
-  const profileScore = 92;
+  const profileScore = profile ? calculateResumeScore(profile) : 0;
   const strokeDashoffset = 283 - (283 * profileScore) / 100;
+  const scoreRating = getScoreRating(profileScore);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8">
@@ -210,7 +212,7 @@ function ResumeAnalysisContent() {
                   <div>
                     <div className="flex items-center justify-between text-xs font-mono-telemetry text-[#8e8c90]">
                       <span>PROFILE STRENGTH</span>
-                      <span className="text-emerald-400 font-bold">TOP 5%</span>
+                      <span className={`font-bold ${scoreRating.color}`}>{scoreRating.tier}</span>
                     </div>
 
                     <div className="flex flex-col items-center py-4">

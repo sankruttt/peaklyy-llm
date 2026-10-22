@@ -101,6 +101,14 @@ export default function RecommendationsPage() {
     );
   }
 
+  const averageMatchScore =
+    recommendations.length > 0
+      ? Math.round(
+          recommendations.reduce((sum, r) => sum + r.match_percentage, 0) /
+            recommendations.length
+        )
+      : 0;
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8">
       {/* Top Header */}
@@ -446,13 +454,20 @@ export default function RecommendationsPage() {
             <div className="p-4 rounded bg-[#201f22] border border-[#353437] space-y-2">
               <div className="flex items-center justify-between text-xs font-mono-telemetry">
                 <span className="text-[#8e8c90]">SKILL OVERLAP:</span>
-                <span className="text-emerald-400 font-bold">92% AVG</span>
+                <span className="text-emerald-400 font-bold">
+                  {averageMatchScore > 0 ? `${averageMatchScore}% AVG` : "--"}
+                </span>
               </div>
               <div className="w-full bg-[#2a2a2c] h-1.5 rounded-full overflow-hidden">
-                <div className="bg-emerald-500 h-full rounded-full w-[92%]" />
+                <div
+                  className="bg-emerald-500 h-full rounded-full transition-all duration-500"
+                  style={{ width: `${averageMatchScore}%` }}
+                />
               </div>
               <p className="text-[10px] font-mono-telemetry text-[#8e8c90]">
-                Calculated across top 10 recommended contracts.
+                {recommendations.length > 0
+                  ? `Calculated across ${recommendations.length} recommended contracts.`
+                  : "Upload a resume to compute skill affinity."}
               </p>
             </div>
           </div>

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../services/api";
 import { Resume, GigRecommendation } from "../../types";
+import { calculateResumeScore, getScoreRating } from "../../utils/scoring";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -69,9 +70,10 @@ export default function DashboardPage() {
   const latestResume = resumes.length > 0 ? resumes[0] : null;
   const topMatch = recommendations.length > 0 ? recommendations[0] : null;
   const topScore = topMatch ? topMatch.match_percentage : 0;
-  // Calculate profile score or default to 92 if analyzed
-  const profileScore = latestResume?.ai_profile ? 92 : 0;
-  const strokeDashoffset = 283 - (283 * (profileScore || 92)) / 100;
+  // Calculate dynamic profile strength score from analyzed resume
+  const profileScore = latestResume?.ai_profile ? calculateResumeScore(latestResume.ai_profile) : 0;
+  const strokeDashoffset = 283 - (283 * profileScore) / 100;
+  const scoreRating = getScoreRating(profileScore);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8">
@@ -380,15 +382,15 @@ export default function DashboardPage() {
                 </svg>
                 <div className="absolute flex flex-col items-center text-center">
                   <span className="text-3xl font-extrabold font-headline text-[#e5e1e4]">
-                    {profileScore || 92}
+                    {profileScore}
                   </span>
                   <span className="text-[9px] font-mono-telemetry text-[#8e8c90] uppercase tracking-wider">
                     STRENGTH PTS
                   </span>
                 </div>
               </div>
-              <p className="text-xs font-mono-telemetry text-emerald-400 mt-3">
-                TOP 5% OF DISTRIBUTED SYSTEM ROLES
+              <p className={`text-xs font-mono-telemetry mt-3 ${scoreRating.color}`}>
+                {scoreRating.label} // {scoreRating.tier}
               </p>
             </div>
 
