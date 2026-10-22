@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+@import "tailwindcss";
+
+:root, .dark {
+  --background: #0e0e10;
+  --foreground: #e5e1e4;
+  --surface-container-lowest: #0e0e10;
+  --surface-container-low: #1c1b1d;
+  --surface-container: #201f22;
+  --surface-container-high: #2a2a2c;
+  --surface-container-highest: #353437;
+  --primary-container: #e8342a;
+  --on-primary-container: #ffffff;
+  --primary: #ffb4aa;
+  --on-surface: #e5e1e4;
+  --on-surface-variant: #e6bdb8;
+  --secondary: #c8c6c9;
+  --accent-red: #e8342a;
+  --accent-red-hover: #d42a20;
+  --accent-red-glow: rgba(232, 52, 42, 0.35);
+}
+
+body {
+  background-color: var(--surface-container-lowest);
+  color: var(--on-surface);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Space Grotesk Headline font helper */
+.font-headline {
+  font-family: "Space Grotesk", sans-serif;
+}
+
+.font-mono-telemetry {
+  font-family: "JetBrains Mono", monospace;
+}
+
+/* Material Symbols Outlined helper */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0e0e10;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a2a2c;
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #e8342a;
+}
+
+/* Stitch Surface Tiers */
+.bg-surface-lowest { background-color: #0e0e10; }
+.bg-surface-low { background-color: #1c1b1d; }
+.bg-surface-mid { background-color: #201f22; }
+.bg-surface-high { background-color: #2a2a2c; }
+.bg-surface-highest { background-color: #353437; }
+
+.border-surface-highest { border-color: #353437; }
+.border-surface-mid { border-color: #2a2a2c; }
+
+/* Primary Electric Red Button */
+.btn-primary-stitch {
+  background-color: #e8342a;
+  color: #ffffff;
+  border: 1px solid #e8342a;
+  transition: all 0.15s ease-in-out;
+}
+.btn-primary-stitch:hover {
+  background-color: #d42a20;
+  border-color: #d42a20;
+  box-shadow: 0 0 16px rgba(232, 52, 42, 0.4);
+}
+
+.btn-secondary-stitch {
+  background-color: #201f22;
+  border: 1px solid #353437;
+  color: #e5e1e4;
+  transition: all 0.15s ease-in-out;
+}
+.btn-secondary-stitch:hover {
+  background-color: #2a2a2c;
+  color: #ffffff;
+}
+
+/* Text Gradients & Glows */
+.gradient-text-red {
+  background: linear-gradient(135deg, #ffffff 40%, #ff8a80 80%, #e8342a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

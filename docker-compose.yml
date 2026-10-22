@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: peaklyy_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: peaklyy_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: peaklyy_backend
+    restart: always
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgrespassword@db:5432/peaklyy_db
+      - JWT_SECRET=peaklyy-secure-production-jwt-token-secret-key-384910283
+      - LLM_PROVIDER=gemini
+      - LLM_API_KEY=${LLM_API_KEY}
+      - LLM_MODEL=gemini-1.5-flash
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/storage/resumes:/app/storage/resumes
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: peaklyy_frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api
+
+volumes:
+  postgres_data:
