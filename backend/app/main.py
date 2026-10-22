@@ -24,16 +24,19 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup: Create tables and seed data
-    logger.info("Initializing database tables...")
-    Base.metadata.create_all(bind=engine)
-    
-    db = SessionLocal()
     try:
-        seed_database(db)
-    finally:
-        db.close()
-    
-    logger.info(f"🚀 {settings.PROJECT_NAME} Backend initialized successfully.")
+        logger.info("Initializing database tables...")
+        Base.metadata.create_all(bind=engine)
+        
+        db = SessionLocal()
+        try:
+            seed_database(db)
+        finally:
+            db.close()
+        logger.info(f"🚀 {settings.PROJECT_NAME} Backend initialized successfully.")
+    except Exception as e:
+        logger.warning(f"Database initialization deferred or failed on cold-start: {e}")
+
     yield
     logger.info(f"Shutting down {settings.PROJECT_NAME} Backend.")
 
@@ -48,6 +51,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_origin_regex=r"^https://.*\.vercel\.app$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -8,7 +8,18 @@ import {
   ChatMessage
 } from "../types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+const getApiBaseUrl = (): string => {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  if (typeof window !== "undefined") {
+    // If deployed on Vercel or custom domain, default to the current origin /api
+    if (window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1") {
+      return `${window.location.origin}/api`;
+    }
+  }
+  return "http://localhost:8000/api";
+};
 
 class ApiService {
   private getToken(): string | null {
@@ -42,7 +53,8 @@ class ApiService {
       headers["Content-Type"] = "application/json";
     }
 
-    const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const baseUrl = getApiBaseUrl();
+    const res = await fetch(`${baseUrl}${endpoint}`, {
       ...options,
       headers,
     });

@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
     
     # File Storage
-    UPLOAD_STORAGE_PATH: str = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../storage/resumes"))
+    UPLOAD_STORAGE_PATH: str = "/tmp/storage/resumes" if os.environ.get("VERCEL") else os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../storage/resumes"))
     MAX_FILE_SIZE_MB: int = 15
     
     # AI / LLM Configuration
