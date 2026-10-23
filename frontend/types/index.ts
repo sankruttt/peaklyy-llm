@@ -11,6 +11,17 @@ export interface SkillProficiency {
   type: "explicit" | "inferred";
 }
 
+export interface ATSEvaluation {
+  score: number;
+  formatting_score: number;
+  impact_score: number;
+  keywords_score: number;
+  brevity_score: number;
+  label: string;
+  tier: string;
+  feedback?: string[];
+}
+
 export interface SkillsData {
   programming_languages?: string[];
   frameworks?: string[];
@@ -21,6 +32,7 @@ export interface SkillsData {
   soft_skills?: string[];
   proficiencies?: SkillProficiency[];
   strongest_skills?: string[];
+  ats_evaluation?: ATSEvaluation;
 }
 
 export interface ExperienceItem {

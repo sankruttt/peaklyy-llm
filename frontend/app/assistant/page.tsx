@@ -216,7 +216,7 @@ function AssistantContent() {
               <div className="flex items-center justify-between text-xs font-mono-telemetry">
                 <span className="text-[#e5e1e4] font-bold">{user?.name || "Engineer"}</span>
                 <span className="text-emerald-400 font-bold">
-                  {resumeScore > 0 ? `${resumeScore} PTS` : "--"}
+                  {resumeScore > 0 ? `ATS: ${resumeScore} PTS` : "--"}
                 </span>
               </div>
               <div className="text-[10px] font-mono-telemetry text-[#8e8c90] truncate">

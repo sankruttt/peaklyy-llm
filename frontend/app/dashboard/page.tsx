@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../services/api";
 import { Resume, GigRecommendation } from "../../types";
-import { calculateResumeScore, getScoreRating } from "../../utils/scoring";
+import { calculateATSScore } from "../../utils/scoring";
 import { formatINR } from "../../utils/currency";
 
 export default function DashboardPage() {
@@ -71,12 +71,10 @@ export default function DashboardPage() {
   const latestResume = resumes.length > 0 ? resumes[0] : null;
   const topMatch = recommendations.length > 0 ? recommendations[0] : null;
   const topScore = topMatch ? topMatch.match_percentage : 0;
-  // Calculate dynamic profile strength score from analyzed resume
-  const profileScore = latestResume?.ai_profile ? calculateResumeScore(latestResume.ai_profile) : 0;
+  // Calculate dynamic ATS score and breakdown from analyzed resume
+  const atsEvaluation = calculateATSScore(latestResume?.ai_profile);
+  const profileScore = atsEvaluation.score;
   const strokeDashoffset = latestResume?.ai_profile ? 283 - (283 * profileScore) / 100 : 283;
-  const scoreRating = latestResume?.ai_profile
-    ? getScoreRating(profileScore)
-    : { label: "NO RESUME INDEXED", tier: "LEVEL 0", color: "text-[#8e8c90]" };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8">
@@ -341,8 +339,9 @@ export default function DashboardPage() {
           {/* Card 1: Active Profile Strength */}
           <div className="p-6 rounded bg-[#1c1b1d] border border-[#353437] space-y-5">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold font-mono-telemetry uppercase text-[#8e8c90] tracking-wider">
-                PROFILE STRENGTH
+              <h3 className="text-xs font-bold font-mono-telemetry uppercase text-[#8e8c90] tracking-wider flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-sm text-[#e8342a]">fact_check</span>
+                <span>ATS RESUME SCORE</span>
               </h3>
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             </div>
@@ -377,13 +376,68 @@ export default function DashboardPage() {
                     {profileScore}
                   </span>
                   <span className="text-[9px] font-mono-telemetry text-[#8e8c90] uppercase tracking-wider">
-                    STRENGTH PTS
+                    ATS PTS / 100
                   </span>
                 </div>
               </div>
-              <p className={`text-xs font-mono-telemetry mt-3 ${scoreRating.color}`}>
-                {scoreRating.label} // {scoreRating.tier}
+              <p className={`text-xs font-mono-telemetry mt-3 font-bold ${atsEvaluation.color}`}>
+                {atsEvaluation.label} // {atsEvaluation.tier}
               </p>
+            </div>
+
+            {/* 4-Factor ATS Benchmark Breakdown */}
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#2a2a2c]">
+              <div className="p-2 rounded bg-[#201f22] border border-[#353437] text-[10px] font-mono-telemetry">
+                <div className="text-[#8e8c90] flex justify-between">
+                  <span>FORMATTING</span>
+                  <span className="text-[#e5e1e4] font-bold">{atsEvaluation.formatting_score}/25</span>
+                </div>
+                <div className="w-full bg-[#2a2a2c] h-1 rounded-full mt-1.5 overflow-hidden">
+                  <div
+                    className="bg-[#e8342a] h-full rounded-full"
+                    style={{ width: `${(atsEvaluation.formatting_score / 25) * 100}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="p-2 rounded bg-[#201f22] border border-[#353437] text-[10px] font-mono-telemetry">
+                <div className="text-[#8e8c90] flex justify-between">
+                  <span>IMPACT</span>
+                  <span className="text-[#e5e1e4] font-bold">{atsEvaluation.impact_score}/25</span>
+                </div>
+                <div className="w-full bg-[#2a2a2c] h-1 rounded-full mt-1.5 overflow-hidden">
+                  <div
+                    className="bg-emerald-400 h-full rounded-full"
+                    style={{ width: `${(atsEvaluation.impact_score / 25) * 100}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="p-2 rounded bg-[#201f22] border border-[#353437] text-[10px] font-mono-telemetry">
+                <div className="text-[#8e8c90] flex justify-between">
+                  <span>KEYWORDS</span>
+                  <span className="text-[#e5e1e4] font-bold">{atsEvaluation.keywords_score}/30</span>
+                </div>
+                <div className="w-full bg-[#2a2a2c] h-1 rounded-full mt-1.5 overflow-hidden">
+                  <div
+                    className="bg-amber-400 h-full rounded-full"
+                    style={{ width: `${(atsEvaluation.keywords_score / 30) * 100}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="p-2 rounded bg-[#201f22] border border-[#353437] text-[10px] font-mono-telemetry">
+                <div className="text-[#8e8c90] flex justify-between">
+                  <span>READABILITY</span>
+                  <span className="text-[#e5e1e4] font-bold">{atsEvaluation.brevity_score}/20</span>
+                </div>
+                <div className="w-full bg-[#2a2a2c] h-1 rounded-full mt-1.5 overflow-hidden">
+                  <div
+                    className="bg-cyan-400 h-full rounded-full"
+                    style={{ width: `${(atsEvaluation.brevity_score / 20) * 100}%` }}
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Current Resume Info */}

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
 import { api } from "../../../services/api";
 import { Resume, AIResumeProfile } from "../../../types";
-import { calculateResumeScore, getScoreRating } from "../../../utils/scoring";
+import { calculateATSScore } from "../../../utils/scoring";
 
 type TabType = "summary" | "skills" | "strengths" | "experience";
 
@@ -98,9 +98,9 @@ function ResumeAnalysisContent() {
     (profile?.skills?.frameworks?.length || 0) +
     (profile?.skills?.databases?.length || 0);
 
-  const profileScore = profile ? calculateResumeScore(profile) : 0;
+  const atsEvaluation = calculateATSScore(profile);
+  const profileScore = atsEvaluation.score;
   const strokeDashoffset = 283 - (283 * profileScore) / 100;
-  const scoreRating = getScoreRating(profileScore);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8">
@@ -208,14 +208,17 @@ function ResumeAnalysisContent() {
               {/* Row 1: Scorecard Panel (1/3) + Executive Brief (2/3) */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {/* Scorecard Panel */}
-                <div className="lg:col-span-4 p-6 rounded bg-[#1c1b1d] border border-[#353437] flex flex-col justify-between space-y-6">
+                <div className="lg:col-span-4 p-6 rounded bg-[#1c1b1d] border border-[#353437] flex flex-col justify-between space-y-5">
                   <div>
                     <div className="flex items-center justify-between text-xs font-mono-telemetry text-[#8e8c90]">
-                      <span>PROFILE STRENGTH</span>
-                      <span className={`font-bold ${scoreRating.color}`}>{scoreRating.tier}</span>
+                      <span className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-[#e5e1e4]">
+                        <span className="material-symbols-outlined text-sm text-[#e8342a]">fact_check</span>
+                        <span>ATS RESUME SCORE</span>
+                      </span>
+                      <span className={`font-bold ${atsEvaluation.color}`}>{atsEvaluation.tier}</span>
                     </div>
 
-                    <div className="flex flex-col items-center py-4">
+                    <div className="flex flex-col items-center py-3">
                       <div className="relative w-36 h-36 flex items-center justify-center">
                         <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
                           <circle
@@ -244,14 +247,95 @@ function ResumeAnalysisContent() {
                             {profileScore}
                           </span>
                           <span className="text-[9px] font-mono-telemetry text-[#8e8c90] uppercase tracking-wider">
-                            PTS / 100
+                            ATS PTS / 100
                           </span>
                         </div>
                       </div>
+                      <p className={`text-xs font-mono-telemetry mt-2.5 font-bold ${atsEvaluation.color}`}>
+                        {atsEvaluation.label}
+                      </p>
                     </div>
+
+                    {/* 4-Factor ATS Benchmark Breakdown */}
+                    <div className="space-y-2 pt-3 border-t border-[#2a2a2c]">
+                      <div className="text-[10px] font-mono-telemetry text-[#8e8c90] uppercase tracking-wider">
+                        ATS BENCHMARK BREAKDOWN
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-[10px] font-mono-telemetry">
+                        <div className="p-2 rounded bg-[#201f22] border border-[#353437]">
+                          <div className="text-[#8e8c90] flex justify-between">
+                            <span>FORMATTING</span>
+                            <span className="text-[#e5e1e4] font-bold">{atsEvaluation.formatting_score}/25</span>
+                          </div>
+                          <div className="w-full bg-[#2a2a2c] h-1 rounded-full mt-1.5 overflow-hidden">
+                            <div
+                              className="bg-[#e8342a] h-full rounded-full"
+                              style={{ width: `${(atsEvaluation.formatting_score / 25) * 100}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="p-2 rounded bg-[#201f22] border border-[#353437]">
+                          <div className="text-[#8e8c90] flex justify-between">
+                            <span>IMPACT</span>
+                            <span className="text-[#e5e1e4] font-bold">{atsEvaluation.impact_score}/25</span>
+                          </div>
+                          <div className="w-full bg-[#2a2a2c] h-1 rounded-full mt-1.5 overflow-hidden">
+                            <div
+                              className="bg-emerald-400 h-full rounded-full"
+                              style={{ width: `${(atsEvaluation.impact_score / 25) * 100}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="p-2 rounded bg-[#201f22] border border-[#353437]">
+                          <div className="text-[#8e8c90] flex justify-between">
+                            <span>KEYWORDS</span>
+                            <span className="text-[#e5e1e4] font-bold">{atsEvaluation.keywords_score}/30</span>
+                          </div>
+                          <div className="w-full bg-[#2a2a2c] h-1 rounded-full mt-1.5 overflow-hidden">
+                            <div
+                              className="bg-amber-400 h-full rounded-full"
+                              style={{ width: `${(atsEvaluation.keywords_score / 30) * 100}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="p-2 rounded bg-[#201f22] border border-[#353437]">
+                          <div className="text-[#8e8c90] flex justify-between">
+                            <span>READABILITY</span>
+                            <span className="text-[#e5e1e4] font-bold">{atsEvaluation.brevity_score}/20</span>
+                          </div>
+                          <div className="w-full bg-[#2a2a2c] h-1 rounded-full mt-1.5 overflow-hidden">
+                            <div
+                              className="bg-cyan-400 h-full rounded-full"
+                              style={{ width: `${(atsEvaluation.brevity_score / 20) * 100}%` }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ATS Action Recommendations */}
+                    {atsEvaluation.feedback && atsEvaluation.feedback.length > 0 && (
+                      <div className="mt-3 p-3 rounded bg-[#201f22] border border-[#e8342a]/30 space-y-1.5">
+                        <div className="text-[10px] font-mono-telemetry text-[#e8342a] uppercase font-bold flex items-center gap-1">
+                          <span className="material-symbols-outlined text-xs">tips_and_updates</span>
+                          <span>ATS OPTIMIZATION TIPS</span>
+                        </div>
+                        <ul className="text-[11px] text-[#c8c6c9] space-y-1">
+                          {atsEvaluation.feedback.map((item, idx) => (
+                            <li key={idx} className="flex items-start gap-1.5">
+                              <span className="text-[#e8342a] mt-0.5">•</span>
+                              <span className="leading-snug">{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="space-y-2 border-t border-[#2a2a2c] pt-4 text-xs font-mono-telemetry">
+                  <div className="space-y-1.5 border-t border-[#2a2a2c] pt-3 text-xs font-mono-telemetry">
                     <div className="flex items-center justify-between text-[#8e8c90]">
                       <span>VERIFIED SKILLS:</span>
                       <span className="text-[#e5e1e4] font-bold">{totalSkillsCount} CAPABILITIES</span>
