@@ -21,15 +21,15 @@ export default function LandingPage() {
 
         <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded bg-[#201f22] border border-[#353437] text-[#e8342a] text-xs font-mono-telemetry font-bold mb-8">
           <span className="w-2 h-2 rounded-full bg-[#e8342a] animate-pulse" />
-          <span>CAREER RADAR // MAWA COPILOT 2.4</span>
+          <span>CAREER RADAR // MAWA ASSISTANT</span>
         </div>
 
         <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight max-w-4xl mx-auto leading-tight sm:leading-none mb-6 font-headline text-[#e5e1e4]">
-          ENGINEERING GIGS WITH <span className="text-[#e8342a]">NEURAL PRECISION.</span>
+          ENGINEERING OPPORTUNITIES. <span className="text-[#e8342a]">POWERED BY INTELLIGENCE.</span>
         </h1>
 
         <p className="text-sm sm:text-base text-[#8e8c90] max-w-2xl mx-auto mb-10 font-mono-telemetry leading-relaxed">
-          Upload your resume specification, run structured Gemma 4 31B semantic extraction, and unlock database-backed contract recommendations with real-time telemetry.
+          Upload your resume and get contract recommendations tailored to your skills.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -38,7 +38,7 @@ export default function LandingPage() {
             className="w-full sm:w-auto btn-primary-stitch text-xs px-8 py-3.5 flex items-center justify-center gap-2 font-mono-telemetry font-bold"
           >
             <span className="material-symbols-outlined text-sm">upload_file</span>
-            <span>INITIALIZE RESUME PARSER</span>
+            <span>UPLOAD RESUME</span>
             <span className="material-symbols-outlined text-sm">arrow_forward</span>
           </Link>
 
@@ -52,34 +52,18 @@ export default function LandingPage() {
         </div>
 
         {/* Feature Badges */}
-        <div className="mt-16 pt-10 border-t border-[#2a2a2c] grid grid-cols-2 sm:grid-cols-4 gap-6 text-left">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-xs font-headline font-bold text-[#e5e1e4]">
-              <span className="material-symbols-outlined text-xs text-[#e8342a]">verified</span>
-              <span>STRUCTURED LLM</span>
-            </div>
-            <p className="text-[11px] font-mono-telemetry text-[#8e8c90]">Gemma 4 31B semantic profiling.</p>
+        <div className="mt-16 pt-10 border-t border-[#2a2a2c] flex flex-wrap items-center justify-center gap-8 sm:gap-14 text-center">
+          <div className="flex items-center justify-center gap-2 text-xs font-headline font-bold text-[#e5e1e4]">
+            <span className="material-symbols-outlined text-xs text-[#e8342a]">verified</span>
+            <span>STRUCTURED LLM</span>
           </div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-xs font-headline font-bold text-[#e5e1e4]">
-              <span className="material-symbols-outlined text-xs text-emerald-400">tune</span>
-              <span>HYBRID SCORING</span>
-            </div>
-            <p className="text-[11px] font-mono-telemetry text-[#8e8c90]">TF-IDF + Cosine compatibility rating.</p>
+          <div className="flex items-center justify-center gap-2 text-xs font-headline font-bold text-[#e5e1e4]">
+            <span className="material-symbols-outlined text-xs text-emerald-400">tune</span>
+            <span>HYBRID SCORING</span>
           </div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-xs font-headline font-bold text-[#e5e1e4]">
-              <span className="material-symbols-outlined text-xs text-[#ffb4aa]">psychology</span>
-              <span>MAWA COPILOT</span>
-            </div>
-            <p className="text-[11px] font-mono-telemetry text-[#8e8c90]">Contextual career negotiation & prep.</p>
-          </div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-xs font-headline font-bold text-[#e5e1e4]">
-              <span className="material-symbols-outlined text-xs text-emerald-400">database</span>
-              <span>POSTGRES NEON</span>
-            </div>
-            <p className="text-[11px] font-mono-telemetry text-[#8e8c90]">Production-grade JWT data isolation.</p>
+          <div className="flex items-center justify-center gap-2 text-xs font-headline font-bold text-[#e5e1e4]">
+            <span className="material-symbols-outlined text-xs text-[#ffb4aa]">psychology</span>
+            <span>MAWA ASSISTANT</span>
           </div>
         </div>
       </section>
