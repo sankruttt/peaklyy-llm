@@ -230,11 +230,10 @@ export default function DashboardPage() {
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <span
-                          className={`px-2.5 py-0.5 rounded text-[10px] font-mono-telemetry font-bold ${
-                            isHighMatch
+                          className={`px-2.5 py-0.5 rounded text-[10px] font-mono-telemetry font-bold ${isHighMatch
                               ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
                               : "bg-amber-500/10 text-amber-400 border border-amber-500/30"
-                          }`}
+                            }`}
                         >
                           {rec.match_percentage}% MATCH
                         </span>
@@ -450,7 +449,7 @@ export default function DashboardPage() {
               </div>
               <div>
                 <h4 className="text-xs font-bold font-headline uppercase text-[#e5e1e4]">
-                  MAWA // AI COPILOT
+                  MAWA // PEAKLYY ASSISSTANT
                 </h4>
                 <p className="text-[10px] text-[#8e8c90] font-mono-telemetry">
                   Direct context into your profile & gigs

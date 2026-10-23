@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
+import peaklyyLogo from "@/public/peaklyy_logo.png";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -54,11 +55,11 @@ export default function RegisterPage() {
           <div className="text-center space-y-3">
             <div className="relative w-14 h-14 rounded-full overflow-hidden mx-auto shadow-xl shadow-[#e8342a]/20 border border-[#353437]">
               <Image
-                src="/peaklyy_logo.png"
+                src={peaklyyLogo}
                 alt="Peaklyy Logo"
-                fill
-                sizes="56px"
-                className="object-cover"
+                width={56}
+                height={56}
+                className="w-full h-full object-cover"
                 priority
               />
             </div>

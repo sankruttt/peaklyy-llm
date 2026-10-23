@@ -5,6 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import { LogOut } from "lucide-react";
+import peaklyyLogo from "@/public/peaklyy_logo.png";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -25,11 +26,11 @@ export default function Navbar() {
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-9 h-9 rounded-full overflow-hidden shadow-lg shadow-[#e8342a]/20 group-hover:scale-105 transition-transform shrink-0 border border-[#353437]">
               <Image
-                src="/peaklyy_logo.png"
+                src={peaklyyLogo}
                 alt="Peaklyy Logo"
-                fill
-                sizes="36px"
-                className="object-cover"
+                width={36}
+                height={36}
+                className="w-full h-full object-cover"
                 priority
               />
             </div>
