@@ -50,7 +50,7 @@ function HeadTailSlider({
     if (activeThumb) {
       try {
         (e.target as HTMLElement).releasePointerCapture(e.pointerId);
-      } catch {}
+      } catch { }
       setActiveThumb(null);
     }
   };
@@ -94,9 +94,8 @@ function HeadTailSlider({
             className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 touch-none cursor-grab active:cursor-grabbing p-2 -m-2"
           >
             <div
-              className={`w-4 h-4 rounded-full bg-[#e8342a] border-2 border-white shadow-[0_0_10px_rgba(232,52,42,0.8)] transition-transform flex items-center justify-center ${
-                activeThumb === "head" ? "scale-125" : "hover:scale-110"
-              }`}
+              className={`w-4 h-4 rounded-full bg-[#e8342a] border-2 border-white shadow-[0_0_10px_rgba(232,52,42,0.8)] transition-transform flex items-center justify-center ${activeThumb === "head" ? "scale-125" : "hover:scale-110"
+                }`}
             >
               <div className="w-1.5 h-1.5 rounded-full bg-white" />
             </div>
@@ -112,9 +111,8 @@ function HeadTailSlider({
             className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 touch-none cursor-grab active:cursor-grabbing p-2 -m-2"
           >
             <div
-              className={`w-4 h-4 rounded-full bg-[#10b981] border-2 border-white shadow-[0_0_10px_rgba(16,185,129,0.8)] transition-transform flex items-center justify-center ${
-                activeThumb === "tail" ? "scale-125" : "hover:scale-110"
-              }`}
+              className={`w-4 h-4 rounded-full bg-[#10b981] border-2 border-white shadow-[0_0_10px_rgba(16,185,129,0.8)] transition-transform flex items-center justify-center ${activeThumb === "tail" ? "scale-125" : "hover:scale-110"
+                }`}
             >
               <div className="w-1.5 h-1.5 rounded-full bg-white" />
             </div>
@@ -291,9 +289,9 @@ export default function RecommendationsPage() {
   const averageMatchScore =
     recommendations.length > 0
       ? Math.round(
-          recommendations.reduce((sum, r) => sum + r.match_percentage, 0) /
-            recommendations.length
-        )
+        recommendations.reduce((sum, r) => sum + r.match_percentage, 0) /
+        recommendations.length
+      )
       : 0;
 
   return (
@@ -301,16 +299,12 @@ export default function RecommendationsPage() {
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#353437]">
         <div>
-          <div className="flex items-center gap-2 mb-2 text-xs font-mono-telemetry text-[#8e8c90]">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>HYBRID MATCHER // TF-IDF + COSINE COMPATIBILITY</span>
-          </div>
+
           <h1 className="text-3xl sm:text-4xl font-extrabold text-[#e5e1e4] tracking-tight font-headline">
             GIG MATCHES & OPPORTUNITIES
           </h1>
           <p className="text-xs text-[#8e8c90] font-mono-telemetry mt-1">
-            Algorithmic role scoring derived from extracted resume proficiencies.
-          </p>
+            AI-driven role matching based on skills and experience identified in your resume.          </p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -322,7 +316,7 @@ export default function RecommendationsPage() {
             <span className={`material-symbols-outlined text-xs ${refreshing ? "animate-spin text-[#e8342a]" : ""}`}>
               sync
             </span>
-            <span>{refreshing ? "RE-SCORING..." : "REFRESH RADAR"}</span>
+            <span>{refreshing ? "RE-SCORING..." : "REFRESH"}</span>
           </button>
           <Link
             href="/resume/upload"
@@ -369,11 +363,10 @@ export default function RecommendationsPage() {
               <button
                 key={tab.id}
                 onClick={() => handleEligibilityTab(tab.id)}
-                className={`flex-1 md:flex-none px-3 py-1 rounded text-xs font-semibold font-mono-telemetry transition-all ${
-                  eligibilityFilter === tab.id
-                    ? "bg-[#2a2a2c] text-white border border-[#e8342a]/60 shadow-[0_0_10px_rgba(232,52,42,0.2)]"
-                    : "text-[#8e8c90] hover:text-[#e5e1e4]"
-                }`}
+                className={`flex-1 md:flex-none px-3 py-1 rounded text-xs font-semibold font-mono-telemetry transition-all ${eligibilityFilter === tab.id
+                  ? "bg-[#2a2a2c] text-white border border-[#e8342a]/60 shadow-[0_0_10px_rgba(232,52,42,0.2)]"
+                  : "text-[#8e8c90] hover:text-[#e5e1e4]"
+                  }`}
               >
                 {tab.label}
               </button>
@@ -390,11 +383,10 @@ export default function RecommendationsPage() {
             <button
               key={pill.value}
               onClick={() => setCategoryFilter(pill.value)}
-              className={`px-3 py-1 rounded text-[11px] font-mono-telemetry transition-all ${
-                categoryFilter === pill.value
-                  ? "bg-[#e8342a] text-white font-bold shadow-md shadow-[#e8342a]/20"
-                  : "bg-[#201f22] text-[#c8c6c9] border border-[#353437] hover:border-[#8e8c90]"
-              }`}
+              className={`px-3 py-1 rounded text-[11px] font-mono-telemetry transition-all ${categoryFilter === pill.value
+                ? "bg-[#e8342a] text-white font-bold shadow-md shadow-[#e8342a]/20"
+                : "bg-[#201f22] text-[#c8c6c9] border border-[#353437] hover:border-[#8e8c90]"
+                }`}
             >
               {pill.label}
             </button>
@@ -410,9 +402,7 @@ export default function RecommendationsPage() {
             <span>
               DISPLAYING <strong className="text-[#e5e1e4]">{filteredRecs.length}</strong> VERIFIED MATCHES
             </span>
-            <span className="text-[11px] text-[#8e8c90] uppercase tracking-wider">
-              RADAR ACTIVE
-            </span>
+
           </div>
 
           {filteredRecs.length > 0 ? (
@@ -430,11 +420,10 @@ export default function RecommendationsPage() {
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <span
-                          className={`px-2.5 py-0.5 rounded text-[10px] font-mono-telemetry font-bold ${
-                            isHighMatch
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
-                              : "bg-amber-500/10 text-amber-400 border border-amber-500/30"
-                          }`}
+                          className={`px-2.5 py-0.5 rounded text-[10px] font-mono-telemetry font-bold ${isHighMatch
+                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
+                            : "bg-amber-500/10 text-amber-400 border border-amber-500/30"
+                            }`}
                         >
                           {rec.match_percentage}% MATCH
                         </span>
@@ -514,11 +503,10 @@ export default function RecommendationsPage() {
                         <button
                           onClick={() => handleApply(rec.gig.id, rec.gig.title)}
                           disabled={hasApplied}
-                          className={`text-xs px-4 py-1.5 rounded font-mono-telemetry font-bold transition-all ${
-                            hasApplied
-                              ? "bg-emerald-600/80 text-white cursor-default"
-                              : "btn-primary-stitch"
-                          }`}
+                          className={`text-xs px-4 py-1.5 rounded font-mono-telemetry font-bold transition-all ${hasApplied
+                            ? "bg-emerald-600/80 text-white cursor-default"
+                            : "btn-primary-stitch"
+                            }`}
                         >
                           {hasApplied ? "✓ APPLIED" : "QUICK APPLY"}
                         </button>
@@ -628,11 +616,10 @@ export default function RecommendationsPage() {
                         setMaxScore(preset.max);
                         setEligibilityFilter(preset.filter);
                       }}
-                      className={`px-2 py-1 text-[10px] font-mono-telemetry rounded transition-all ${
-                        isActive
-                          ? "bg-[#e8342a] text-white font-bold shadow-sm"
-                          : "bg-[#201f22] text-[#8e8c90] hover:text-white border border-[#353437] hover:border-[#8e8c90]"
-                      }`}
+                      className={`px-2 py-1 text-[10px] font-mono-telemetry rounded transition-all ${isActive
+                        ? "bg-[#e8342a] text-white font-bold shadow-sm"
+                        : "bg-[#201f22] text-[#8e8c90] hover:text-white border border-[#353437] hover:border-[#8e8c90]"
+                        }`}
                     >
                       {preset.label}
                     </button>

@@ -254,15 +254,15 @@ function ResumeAnalysisContent() {
                   <div className="space-y-2 border-t border-[#2a2a2c] pt-4 text-xs font-mono-telemetry">
                     <div className="flex items-center justify-between text-[#8e8c90]">
                       <span>VERIFIED SKILLS:</span>
-                      <span className="text-[#e5e1e4] font-bold">{totalSkillsCount || 24} CAPABILITIES</span>
+                      <span className="text-[#e5e1e4] font-bold">{totalSkillsCount} CAPABILITIES</span>
                     </div>
                     <div className="flex items-center justify-between text-[#8e8c90]">
-                      <span>CONFIDENCE:</span>
-                      <span className="text-emerald-400 font-bold">98.4% STRUCTURED</span>
+                      <span>EXPERIENCE NODES:</span>
+                      <span className="text-[#e5e1e4] font-bold">{profile.experience?.length || 0} ROLES</span>
                     </div>
                     <div className="flex items-center justify-between text-[#8e8c90]">
-                      <span>PARSER:</span>
-                      <span className="text-[#c8c6c9]">GEMMA 4 31B</span>
+                      <span>PROJECTS INDEXED:</span>
+                      <span className="text-[#e5e1e4] font-bold">{profile.projects?.length || 0} COMPLETED</span>
                     </div>
                   </div>
                 </div>
@@ -279,11 +279,13 @@ function ResumeAnalysisContent() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 rounded bg-[#201f22] border border-[#353437] text-[10px] font-mono-telemetry text-emerald-400">
-                          8+ YRS EXPERIENCE
-                        </span>
-                        <span className="px-2 py-0.5 rounded bg-[#201f22] border border-[#353437] text-[10px] font-mono-telemetry text-[#ffb4aa]">
-                          SENIOR / STAFF ARCHITECT
+                        {(profile.experience?.length || 0) > 0 && (
+                          <span className="px-2 py-0.5 rounded bg-[#201f22] border border-[#353437] text-[10px] font-mono-telemetry text-emerald-400 uppercase">
+                            {profile.experience.length} {profile.experience.length === 1 ? "ROLE RECORDED" : "ROLES RECORDED"}
+                          </span>
+                        )}
+                        <span className="px-2 py-0.5 rounded bg-[#201f22] border border-[#353437] text-[10px] font-mono-telemetry text-[#ffb4aa] uppercase truncate max-w-[240px]">
+                          {profile.experience?.[0]?.role || profile.skills?.strongest_skills?.[0] || "ENGINEERING PROFILE"}
                         </span>
                       </div>
                     </div>
@@ -298,13 +300,14 @@ function ResumeAnalysisContent() {
                       CORE STRENGTH CLOUD
                     </div>
                     <div className="flex flex-wrap gap-1.5">
-                      {(profile.skills?.strongest_skills || [
-                        "Distributed Systems",
-                        "High Throughput APIs",
-                        "PostgreSQL Optimization",
-                        "Kubernetes Infrastructure",
-                        "Event-Driven Architecture",
-                      ]).map((skill, idx) => (
+                      {((profile.skills?.strongest_skills && profile.skills.strongest_skills.length > 0)
+                        ? profile.skills.strongest_skills
+                        : [
+                            ...(profile.skills?.programming_languages || []),
+                            ...(profile.skills?.frameworks || []),
+                            ...(profile.skills?.technical_skills || []),
+                          ].slice(0, 6)
+                      ).map((skill, idx) => (
                         <span
                           key={idx}
                           className="px-2.5 py-1 rounded bg-[#201f22] border border-[#353437] text-xs font-mono-telemetry text-[#e5e1e4]"
@@ -326,16 +329,18 @@ function ResumeAnalysisContent() {
                     <span>KEY PROFILE STRENGTHS</span>
                   </div>
                   <ul className="space-y-3 text-xs text-[#c8c6c9]">
-                    {(profile.strengths || [
-                      "Exceptional expertise in distributed caching and database clustering.",
-                      "Demonstrated success architecting multi-region failover and low-latency APIs.",
-                      "Strong alignment with staff-level engineering leadership gigs.",
-                    ]).map((str, idx) => (
-                      <li key={idx} className="flex items-start gap-2.5 p-3 rounded bg-[#201f22] border border-[#353437]">
-                        <span className="material-symbols-outlined text-emerald-400 text-sm mt-0.5">check_circle</span>
-                        <span className="leading-relaxed">{str}</span>
+                    {profile.strengths && profile.strengths.length > 0 ? (
+                      profile.strengths.map((str, idx) => (
+                        <li key={idx} className="flex items-start gap-2.5 p-3 rounded bg-[#201f22] border border-[#353437]">
+                          <span className="material-symbols-outlined text-emerald-400 text-sm mt-0.5">check_circle</span>
+                          <span className="leading-relaxed">{str}</span>
+                        </li>
+                      ))
+                    ) : (
+                      <li className="p-3 rounded bg-[#201f22] border border-[#353437] text-[#8e8c90] text-xs font-mono-telemetry">
+                        No distinct strengths highlighted.
                       </li>
-                    ))}
+                    )}
                   </ul>
                 </div>
 
@@ -346,20 +351,21 @@ function ResumeAnalysisContent() {
                     <span>AREAS TO IMPROVE // IDENTIFIED GAPS</span>
                   </div>
                   <ul className="space-y-3 text-xs text-[#c8c6c9]">
-                    {(profile.weaknesses || [
-                      "Limited explicit mention of Terraform/IaC automation in recent roles.",
-                      "Could quantify business impact metrics ($ savings, TPS throughput) more directly.",
-                    ]).map((weak, idx) => (
-                      <li key={idx} className="flex items-start gap-2.5 p-3 rounded bg-[#201f22] border border-[#353437]">
-                        <span className="material-symbols-outlined text-[#e8342a] text-sm mt-0.5">error</span>
-                        <div className="flex-1">
-                          <span className="leading-relaxed">{weak}</span>
-                          <span className="block mt-1 text-[10px] font-mono-telemetry text-[#8e8c90]">
-                            POTENTIAL +6% MATCH BOOST IF REMEDIATED
-                          </span>
-                        </div>
+                    {profile.weaknesses && profile.weaknesses.length > 0 ? (
+                      profile.weaknesses.map((weak, idx) => (
+                        <li key={idx} className="flex items-start gap-2.5 p-3 rounded bg-[#201f22] border border-[#353437]">
+                          <span className="material-symbols-outlined text-[#e8342a] text-sm mt-0.5">error</span>
+                          <div className="flex-1">
+                            <span className="leading-relaxed">{weak}</span>
+                          </div>
+                        </li>
+                      ))
+                    ) : (
+                      <li className="p-3 rounded bg-[#201f22] border border-[#353437] text-emerald-400 text-xs font-mono-telemetry flex items-center gap-2">
+                        <span className="material-symbols-outlined text-emerald-400 text-sm">check</span>
+                        <span>No major gaps detected in profile.</span>
                       </li>
-                    ))}
+                    )}
                   </ul>
                 </div>
               </div>

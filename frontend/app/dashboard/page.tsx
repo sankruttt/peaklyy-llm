@@ -83,15 +83,12 @@ export default function DashboardPage() {
       {/* Top Header Row */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#353437]">
         <div>
-          <div className="flex items-center gap-2 mb-2 text-xs font-mono-telemetry text-[#8e8c90]">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>RADAR STATUS: ACTIVE // NODE 01</span>
-          </div>
+
           <h1 className="text-3xl sm:text-4xl font-extrabold text-[#e5e1e4] tracking-tight font-headline">
             GOOD MORNING, {user?.name?.toUpperCase() || "ENGINEER"}
           </h1>
           <p className="text-xs text-[#8e8c90] font-mono-telemetry mt-1">
-            Real-time hybrid gig matching engine & neural profile diagnostic.
+            Intelligent gig matching & AI-powered skill analysis.
           </p>
         </div>
 
@@ -116,16 +113,22 @@ export default function DashboardPage() {
       {/* 3 KPI Metric Cards (Engine Status tab removed) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Metric 1: Top Match */}
-        <div className="p-5 rounded bg-[#1c1b1d] border border-[#353437] hover:border-[#e8342a]/40 transition-all flex flex-col justify-between">
+        <Link
+          href={topMatch ? `/gigs/${topMatch.gig.id}` : "/recommendations"}
+          title={topMatch ? `View ${topMatch.gig.title} specification` : "View recommended gigs"}
+          className="p-5 rounded bg-[#1c1b1d] border border-[#353437] hover:border-[#e8342a] hover:shadow-[0_0_15px_rgba(232,52,42,0.15)] transition-all flex flex-col justify-between group cursor-pointer"
+        >
           <div className="flex items-center justify-between text-xs font-mono-telemetry text-[#8e8c90]">
-            <span>TOP MATCH</span>
-            <span className="material-symbols-outlined text-emerald-400 text-sm">verified</span>
+            <span className="group-hover:text-[#e8342a] transition-colors">TOP MATCH</span>
+            <span className="material-symbols-outlined text-emerald-400 text-sm group-hover:translate-x-0.5 transition-transform">
+              arrow_forward
+            </span>
           </div>
           <div className="my-3">
-            <div className="text-3xl font-extrabold font-headline text-[#e5e1e4]">
+            <div className="text-3xl font-extrabold font-headline text-[#e5e1e4] group-hover:text-white transition-colors">
               {topScore > 0 ? `${topScore}%` : "--"}
             </div>
-            <p className="text-[11px] text-[#8e8c90] font-mono-telemetry truncate mt-1">
+            <p className="text-[11px] text-[#8e8c90] group-hover:text-[#e5e1e4] font-mono-telemetry truncate mt-1 transition-colors">
               {topMatch ? topMatch.gig.title : "No matches computed yet"}
             </p>
           </div>
@@ -135,7 +138,7 @@ export default function DashboardPage() {
               style={{ width: `${topScore > 0 ? topScore : 0}%` }}
             />
           </div>
-        </div>
+        </Link>
 
         {/* Metric 2: Active Resumes */}
         <div className="p-5 rounded bg-[#1c1b1d] border border-[#353437] hover:border-[#e8342a]/40 transition-all flex flex-col justify-between">
@@ -206,7 +209,7 @@ export default function DashboardPage() {
                 <span className={`material-symbols-outlined text-xs ${refreshing ? "animate-spin text-[#e8342a]" : ""}`}>
                   sync
                 </span>
-                <span>{refreshing ? "COMPUTING..." : "REFRESH RADAR"}</span>
+                <span>{refreshing ? "COMPUTING..." : "REFRESH"}</span>
               </button>
               <Link
                 href="/recommendations"
@@ -231,8 +234,8 @@ export default function DashboardPage() {
                       <div className="flex items-center gap-2">
                         <span
                           className={`px-2.5 py-0.5 rounded text-[10px] font-mono-telemetry font-bold ${isHighMatch
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
-                              : "bg-amber-500/10 text-amber-400 border border-amber-500/30"
+                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
+                            : "bg-amber-500/10 text-amber-400 border border-amber-500/30"
                             }`}
                         >
                           {rec.match_percentage}% MATCH
@@ -321,7 +324,7 @@ export default function DashboardPage() {
                 NO GIG RECOMMENDATIONS GENERATED YET
               </h4>
               <p className="text-xs text-[#8e8c90] font-mono-telemetry max-w-md mx-auto">
-                Upload your resume or trigger the recommendation radar to discover curated high-fit contracts.
+                Upload your resume to discover curated high-fit contracts.
               </p>
               <Link
                 href="/resume/upload"
@@ -339,7 +342,7 @@ export default function DashboardPage() {
           <div className="p-6 rounded bg-[#1c1b1d] border border-[#353437] space-y-5">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-bold font-mono-telemetry uppercase text-[#8e8c90] tracking-wider">
-                ACTIVE PROFILE RADAR
+                PROFILE STRENGTH
               </h3>
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             </div>
@@ -449,7 +452,7 @@ export default function DashboardPage() {
               </div>
               <div>
                 <h4 className="text-xs font-bold font-headline uppercase text-[#e5e1e4]">
-                  MAWA // PEAKLYY ASSISSTANT
+                  MAWA // PEAKLYY ASSISTANT
                 </h4>
                 <p className="text-[10px] text-[#8e8c90] font-mono-telemetry">
                   Direct context into your profile & gigs
