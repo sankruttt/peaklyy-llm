@@ -7,6 +7,7 @@ import { useAuth } from "../../context/AuthContext";
 import { api } from "../../services/api";
 import { Resume, GigRecommendation } from "../../types";
 import { calculateResumeScore, getScoreRating } from "../../utils/scoring";
+import { formatINR } from "../../utils/currency";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -257,7 +258,7 @@ export default function DashboardPage() {
                       </div>
 
                       <div className="text-xs font-mono-telemetry font-bold text-[#e8342a]">
-                        {rec.gig.compensation}
+                        {formatINR(rec.gig.compensation)}
                       </div>
                     </div>
 

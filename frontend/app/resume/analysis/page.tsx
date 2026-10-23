@@ -129,7 +129,7 @@ function ResumeAnalysisContent() {
           </div>
 
           <div className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded bg-[#201f22] border border-[#353437] text-[11px] font-mono-telemetry text-[#ffb4aa]">
-            <span>TARGET: $85/HR</span>
+            <span>TARGET: ₹7,000/HR</span>
           </div>
         </div>
 

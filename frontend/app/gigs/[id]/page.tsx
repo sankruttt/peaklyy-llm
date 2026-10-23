@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
 import { api } from "../../../services/api";
 import { Gig, GigRecommendation } from "../../../types";
+import { formatINR } from "../../../utils/currency";
 
 export default function GigDetailsPage() {
   const params = useParams();
@@ -123,7 +124,7 @@ export default function GigDetailsPage() {
             <span className="text-[10px] uppercase font-bold text-[#8e8c90] tracking-wider font-mono-telemetry">
               COMPENSATION
             </span>
-            <div className="text-2xl font-black font-headline text-[#e8342a]">{gig.compensation}</div>
+            <div className="text-2xl font-black font-headline text-[#e8342a]">{formatINR(gig.compensation)}</div>
 
             <button
               onClick={handleApply}

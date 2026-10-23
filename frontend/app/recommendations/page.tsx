@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../services/api";
 import { GigRecommendation } from "../../types";
+import { formatINR } from "../../utils/currency";
 
 export default function RecommendationsPage() {
   const router = useRouter();
@@ -258,7 +259,7 @@ export default function RecommendationsPage() {
                       </div>
 
                       <div className="text-xs font-mono-telemetry font-bold text-[#e8342a]">
-                        {rec.gig.compensation}
+                        {formatINR(rec.gig.compensation)}
                       </div>
                     </div>
 

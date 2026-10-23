@@ -15,7 +15,7 @@ INITIAL_GIGS = [
         "eligibility_requirements": ["Minimum 4+ years frontend web engineering", "Demonstrated proficiency with Next.js App Router"],
         "location": "Remote (Global)",
         "work_type": "Contract",
-        "compensation": "$75 - $95 / hr",
+        "compensation": "₹6,000 - ₹8,000 / hr",
         "duration": "6 Months",
         "application_deadline": "Rolling",
         "status": "active"
@@ -30,7 +30,7 @@ INITIAL_GIGS = [
         "eligibility_requirements": ["Minimum 4+ years backend Python development", "Strong relational database optimization skills"],
         "location": "Remote (US/Canada/Europe)",
         "work_type": "Contract",
-        "compensation": "$85 - $110 / hr",
+        "compensation": "₹7,000 - ₹9,000 / hr",
         "duration": "4 Months",
         "application_deadline": "Rolling",
         "status": "active"
@@ -45,7 +45,7 @@ INITIAL_GIGS = [
         "eligibility_requirements": ["Minimum 2+ years full-stack experience", "Experience delivering customer-facing web apps"],
         "location": "Remote",
         "work_type": "Contract",
-        "compensation": "$55 - $75 / hr",
+        "compensation": "₹4,500 - ₹6,000 / hr",
         "duration": "3 Months",
         "application_deadline": "Rolling",
         "status": "active"
@@ -60,7 +60,7 @@ INITIAL_GIGS = [
         "eligibility_requirements": ["2+ years specialized Python scripting and ETL experience"],
         "location": "Remote",
         "work_type": "Freelance",
-        "compensation": "$50 - $70 / hr",
+        "compensation": "₹4,000 - ₹5,500 / hr",
         "duration": "2 Months",
         "application_deadline": "Rolling",
         "status": "active"
@@ -75,7 +75,7 @@ INITIAL_GIGS = [
         "eligibility_requirements": ["Hands-on experience building generative AI / RAG pipelines in production"],
         "location": "Remote",
         "work_type": "Contract",
-        "compensation": "$90 - $125 / hr",
+        "compensation": "₹7,500 - ₹10,500 / hr",
         "duration": "6 Months",
         "application_deadline": "Rolling",
         "status": "active"
@@ -90,7 +90,7 @@ INITIAL_GIGS = [
         "eligibility_requirements": ["Strong SQL query mastery and data storytelling experience"],
         "location": "Remote",
         "work_type": "Contract",
-        "compensation": "$45 - $65 / hr",
+        "compensation": "₹3,500 - ₹5,000 / hr",
         "duration": "3 Months",
         "application_deadline": "Rolling",
         "status": "active"
@@ -105,7 +105,7 @@ INITIAL_GIGS = [
         "eligibility_requirements": ["Portfolio of shipped interactive digital products"],
         "location": "Remote",
         "work_type": "Freelance",
-        "compensation": "$50 - $80 / hr",
+        "compensation": "₹4,000 - ₹6,500 / hr",
         "duration": "3 Months",
         "application_deadline": "Rolling",
         "status": "active"
@@ -120,7 +120,7 @@ INITIAL_GIGS = [
         "eligibility_requirements": ["Demonstrated portfolio of published technical or B2B articles"],
         "location": "Remote",
         "work_type": "Freelance",
-        "compensation": "$40 - $60 / hr",
+        "compensation": "₹3,000 - ₹5,000 / hr",
         "duration": "Ongoing",
         "application_deadline": "Rolling",
         "status": "active"
@@ -135,7 +135,7 @@ INITIAL_GIGS = [
         "eligibility_requirements": ["Strong creative design portfolio"],
         "location": "Remote",
         "work_type": "Contract",
-        "compensation": "$45 - $65 / hr",
+        "compensation": "₹3,500 - ₹5,500 / hr",
         "duration": "2 Months",
         "application_deadline": "Rolling",
         "status": "active"

@@ -1,4 +1,5 @@
 import logging
+import re
 from datetime import datetime
 from sqlalchemy.orm import Session
 from app.models.resume import Resume, AIResumeProfile
@@ -7,6 +8,29 @@ from app.services.ai.llm_service import llm_service
 from app.services.ai.skill_extraction import skill_extraction_service
 
 logger = logging.getLogger(__name__)
+
+EMOJI_PATTERN = re.compile(
+    "["
+    "\U0001F600-\U0001F64F"
+    "\U0001F300-\U0001F5FF"
+    "\U0001F680-\U0001F6FF"
+    "\U0001F1E0-\U0001F1FF"
+    "\U00002702-\U000027B0"
+    "\U000024C2-\U0001F251"
+    "\U0001F900-\U0001F9FF"
+    "\U0001FA70-\U0001FAFF"
+    "]+",
+    flags=re.UNICODE
+)
+
+def strip_emojis(obj):
+    if isinstance(obj, str):
+        return EMOJI_PATTERN.sub("", obj).strip()
+    elif isinstance(obj, list):
+        return [strip_emojis(i) for i in obj]
+    elif isinstance(obj, dict):
+        return {k: strip_emojis(v) for k, v in obj.items()}
+    return obj
 
 RESUME_ANALYSIS_SYSTEM_PROMPT = """
 You are an expert AI Resume Analyst and Career Architect for Peaklyy.
@@ -87,6 +111,8 @@ Rules:
 2. Mark proficiencies accurately: 'Beginner', 'Intermediate', 'Advanced', or 'Expert'.
 3. Distinguish between explicit skills (directly mentioned in text) and inferred skills (evidenced by project context).
 4. Return ONLY valid JSON, no markdown intro, no conversational text.
+5. SHORT & WELL-STRUCTURED: Keep all executive summaries, strengths, weaknesses, and improvement suggestions brief, crisp, and high-signal (max 2-3 sentences).
+6. ABSOLUTELY NO EMOJIS: Do NOT include any emojis anywhere in any JSON strings or keys. Strictly zero emojis.
 """
 
 class ResumeAnalysisService:
@@ -105,6 +131,7 @@ class ResumeAnalysisService:
                 prompt=user_prompt,
                 system_instruction=RESUME_ANALYSIS_SYSTEM_PROMPT
             )
+            raw_data = strip_emojis(raw_data)
             
             # Enrich skills
             raw_skills = raw_data.get("skills", {})

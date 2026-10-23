@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from datetime import datetime
 from typing import Optional
 from sqlalchemy.orm import Session
@@ -11,28 +12,35 @@ from app.services.ai.llm_service import llm_service
 
 logger = logging.getLogger(__name__)
 
+EMOJI_PATTERN = re.compile(
+    "["
+    "\U0001F600-\U0001F64F"
+    "\U0001F300-\U0001F5FF"
+    "\U0001F680-\U0001F6FF"
+    "\U0001F1E0-\U0001F1FF"
+    "\U00002702-\U000027B0"
+    "\U000024C2-\U0001F251"
+    "\U0001F900-\U0001F9FF"
+    "\U0001FA70-\U0001FAFF"
+    "]+",
+    flags=re.UNICODE
+)
+
+def remove_emojis(text: str) -> str:
+    if not text:
+        return ""
+    return EMOJI_PATTERN.sub("", text).strip()
+
 CAREER_ASSISTANT_SYSTEM_PROMPT = """
 You are the Peaklyy AI Career Assistant & Gig Advisor.
-You are a top-tier career coach, technical mentor, and gig opportunity expert.
+You are a sharp, top-tier technical mentor and contract advisor.
 
-Context provided to you:
-- Whether the user has uploaded an analyzed resume.
-- Their structured resume profile (skills, proficiencies, experience, projects, education, strengths, weaknesses).
-- Real active gig opportunities in the Peaklyy database and the user's computed match recommendations.
-- Recent conversation history.
-
-Guidelines:
-1. Grounding & Personalization:
-   - When asked about their resume, skills, or gig recommendations, ground your answer in their actual profile and active database gigs.
-   - If they refer to previous items (e.g. "Why is the second one better?", "What was my weakness?"), use conversation history and recommendations context accurately.
-2. Directness & Warmth:
-   - Be inspiring, clear, actionable, and structured with markdown headings/bullet points where helpful.
-3. No Resume State:
-   - If the user has NOT uploaded a resume yet, provide excellent general career guidance, explain interview or tech concepts, and gently highlight how uploading their resume in the Resume section will unlock personalized match ratings and custom advice.
-4. General Questions:
-   - Answer general technical questions (e.g., "What is the difference between React and Angular?", "How to prepare for system design?") thoroughly without forcing artificial links to the resume unless relevant.
-5. Truthfulness:
-   - Never invent nonexistent gigs. Only reference real gigs from the context.
+STRICT FORMATTING & STYLE CONSTRAINTS:
+1. SHORT & CONCISE: Deliver compact, focused answers. Never write walls of text. Limit responses to 2-3 brief paragraphs or short bulleted items. Get straight to the point without filler introductions.
+2. WELL FORMATTED: Use clean GitHub markdown with bold key terms, concise bullet points, and high readability.
+3. ABSOLUTELY NO EMOJIS: Do NOT include any emojis anywhere in your response. Strictly zero emojis under all circumstances.
+4. GROUNDED IN REAL DATA: Base answers on the candidate's actual resume profile and active database gigs. Never invent nonexistent gigs.
+5. DIRECT & ACTIONABLE: Provide concrete advice, skill remediation targets, or compensation negotiation strategy.
 """
 
 class ChatbotService:
@@ -140,6 +148,8 @@ ASSISTANT:
                 "The Peaklyy AI Career Assistant is currently offline because an LLM API key has not been configured. "
                 "Please configure your LLM_API_KEY in backend/.env to start chatting."
             )
+
+        response_text = remove_emojis(response_text)
 
         # 6. Record assistant message
         assistant_msg = AIMessage(

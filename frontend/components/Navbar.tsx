@@ -29,9 +29,6 @@ export default function Navbar() {
               <span className="text-xl font-bold tracking-tight text-[#e5e1e4] group-hover:text-white transition-colors font-headline">
                 PEAKLYY<span className="text-[#e8342a]">.</span>
               </span>
-              <span className="text-[9px] uppercase tracking-widest text-[#c8c6c9] font-mono-telemetry font-semibold">
-                NEURAL RADAR
-              </span>
             </div>
           </Link>
 
@@ -64,10 +61,6 @@ export default function Navbar() {
 
         {/* Right Status & Auth */}
         <div className="flex items-center gap-4">
-          <div className="hidden xl:flex items-center gap-2 px-2.5 py-1 rounded bg-[#201f22] border border-[#353437] text-[11px] font-mono-telemetry text-[#8e8c90]">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>CORE: ONLINE</span>
-          </div>
 
           {isAuthenticated && user ? (
             <div className="flex items-center gap-3">

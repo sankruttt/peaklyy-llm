@@ -3,6 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import ChatBubble from "../components/ChatBubble";
 
 export const metadata: Metadata = {
   title: "Peaklyy – AI-Powered Gig Recommendation & Career Assistant",
@@ -30,6 +31,7 @@ export default function RootLayout({
             <Navbar />
             <main className="flex-1 flex flex-col">{children}</main>
             <Footer />
+            <ChatBubble />
           </div>
         </AuthProvider>
       </body>
