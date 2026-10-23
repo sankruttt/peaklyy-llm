@@ -72,7 +72,7 @@ export default function LandingPage() {
       <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-10 space-y-2">
           <h2 className="text-2xl sm:text-3xl font-extrabold font-headline uppercase text-[#e5e1e4]">
-            THREE CORE PLATFORM NODES
+            THREE CORE PLATFORM FEATURES
           </h2>
           <p className="text-xs font-mono-telemetry text-[#8e8c90] max-w-lg mx-auto">
             Unified telemetry to calibrate your profile, discover contracts, and accelerate negotiation.
@@ -90,14 +90,13 @@ export default function LandingPage() {
                 01. RESUME INTELLIGENCE
               </h3>
               <p className="text-xs text-[#8e8c90] font-mono-telemetry leading-relaxed">
-                Extracts languages, framework competencies, responsibilities, projects, and diagnostic weaknesses from PDF/DOCX files.
-              </p>
+                Analyzes PDF/DOCX resumes to identify technical skills, frameworks, experience, projects, and areas for improvement.</p>
             </div>
             <Link
               href="/resume/analysis"
               className="text-xs font-mono-telemetry text-[#e8342a] flex items-center gap-1 group-hover:translate-x-1 transition-transform"
             >
-              <span>INSPECT RADAR DIAGNOSTIC</span>
+              <span>VIEW ANALYSIS</span>
               <span className="material-symbols-outlined text-xs">arrow_forward</span>
             </Link>
           </div>
@@ -112,7 +111,7 @@ export default function LandingPage() {
                 02. HYBRID GIG MATCHING
               </h3>
               <p className="text-xs text-[#8e8c90] font-mono-telemetry leading-relaxed">
-                Computes weighted compatibility percentages against active contracts with personalized synthesis and missing capability tags.
+                Calculates skill-based compatibility scores for active gigs, highlighting relevant strengths, skill gaps, and personalized recommendations.
               </p>
             </div>
             <Link
@@ -134,7 +133,7 @@ export default function LandingPage() {
                 03. MAWA CAREER COPILOT
               </h3>
               <p className="text-xs text-[#8e8c90] font-mono-telemetry leading-relaxed">
-                A conversational advisor with real-time context of your analyzed resume, strengths, and targeted contract specifications.
+                An AI-powered career advisor that understands your resume, identifies your strengths, and provides personalized guidance based on relevant gig opportunities.
               </p>
             </div>
             <Link

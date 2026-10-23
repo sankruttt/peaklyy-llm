@@ -90,7 +90,7 @@ export default function RegisterPage() {
                 <input
                   type="text"
                   required
-                  placeholder="Alex Mercer"
+                  placeholder="Spider Man"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 rounded bg-[#201f22] border border-[#353437] focus:border-[#e8342a] focus:outline-none text-xs font-mono-telemetry text-[#e5e1e4] placeholder-[#8e8c90] transition-all"
@@ -109,7 +109,7 @@ export default function RegisterPage() {
                 <input
                   type="email"
                   required
-                  placeholder="alex.mercer@example.com"
+                  placeholder="spiderman@gmail.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 rounded bg-[#201f22] border border-[#353437] focus:border-[#e8342a] focus:outline-none text-xs font-mono-telemetry text-[#e5e1e4] placeholder-[#8e8c90] transition-all"

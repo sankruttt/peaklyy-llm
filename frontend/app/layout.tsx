@@ -9,7 +9,11 @@ export const metadata: Metadata = {
   title: "Peaklyy – AI-Powered Gig Recommendation & Career Assistant",
   description: "Upload resumes, receive intelligent gig recommendations, and interact with your personalized AI Career Assistant.",
   icons: {
-    icon: "/peaklyy_logo.png",
+    icon: [
+      { url: "/peaklyy_logo.png", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    shortcut: "/peaklyy_logo.png",
     apple: "/peaklyy_logo.png",
   },
 };
@@ -22,6 +26,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark h-full antialiased">
       <head>
+        <link rel="icon" href="/peaklyy_logo.png" type="image/png" sizes="any" />
+        <link rel="shortcut icon" href="/peaklyy_logo.png" />
+        <link rel="apple-touch-icon" href="/peaklyy_logo.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
