@@ -8,6 +8,10 @@ import ChatBubble from "../components/ChatBubble";
 export const metadata: Metadata = {
   title: "Peaklyy – AI-Powered Gig Recommendation & Career Assistant",
   description: "Upload resumes, receive intelligent gig recommendations, and interact with your personalized AI Career Assistant.",
+  icons: {
+    icon: "/peaklyy_logo.png",
+    apple: "/peaklyy_logo.png",
+  },
 };
 
 export default function RootLayout({

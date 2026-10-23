@@ -117,7 +117,7 @@ def test_full_pipeline():
     print(f"Missing Skills: {top_rec['missing_skills']}")
     print(f"AI Reason: {top_rec['recommendation_reason']}")
 
-    print("\n--- [7] Testing Context-Aware AI Career Assistant Chatbot ---")
+    print("\n--- [7] Testing Context-Aware Mawa AI Chatbot ---")
     chat_payload = {
         "message": "Which gigs match my skills best, and what should I learn next?"
     }
@@ -127,7 +127,7 @@ def test_full_pipeline():
     conv_id = chat_resp["conversation_id"]
     reply_1 = chat_resp["message"]["content"]
     print(f"Conversation ID: {conv_id}")
-    print("AI Career Assistant Initial Reply:\n", reply_1[:250], "...\n")
+    print("Mawa Initial Reply:\n", reply_1[:250], "...\n")
 
     # Follow-up message testing memory
     follow_payload = {
@@ -137,7 +137,7 @@ def test_full_pipeline():
     follow_res = client.post("/api/ai/chat", json=follow_payload, headers=headers)
     assert follow_res.status_code == 200
     reply_2 = follow_res.json()["message"]["content"]
-    print("AI Career Assistant Follow-up Reply:\n", reply_2[:250], "...\n")
+    print("Mawa Follow-up Reply:\n", reply_2[:250], "...\n")
 
     print("\n🎉 ALL P0 & P1 BACKEND PIPELINE TESTS PASSED SUCCESSFULLY! 🎉\n")
 

@@ -31,13 +31,37 @@ def remove_emojis(text: str) -> str:
         return ""
     return EMOJI_PATTERN.sub("", text).strip()
 
+def clean_chat_response(text: str) -> str:
+    if not text:
+        return ""
+    text = remove_emojis(text)
+    
+    # 1. Remove horizontal rule lines made of asterisks or dashes (e.g. ***, ****, ---, ___)
+    text = re.sub(r"^\s*[\*\-_]{3,}\s*$", "", text, flags=re.MULTILINE)
+    
+    # 2. Replace triple asterisks ***text*** (bold-italic) with standard bold **text**
+    text = re.sub(r"\*{3,}([^\*\n]+?)\*{3,}", r"**\1**", text)
+    
+    # 3. Clean up bullet points starting with * ** to - **
+    text = re.sub(r"^\s*[\*\-]\s*\*\*", "- **", text, flags=re.MULTILINE)
+    
+    # 4. Clean any remaining 3 or more asterisks
+    text = re.sub(r"\*{3,}", "", text)
+    
+    # 5. Clean multiple consecutive blank lines
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    
+    return text.strip()
+
 CAREER_ASSISTANT_SYSTEM_PROMPT = """
-You are the Peaklyy AI Career Assistant & Gig Advisor.
-You are a sharp, top-tier technical mentor and contract advisor.
+You are Mawa, the Peaklyy AI Career Assistant & Gig Advisor.
+You are Mawa — a sharp, friendly, and top-tier technical mentor and contract advisor.
 
 STRICT FORMATTING & STYLE CONSTRAINTS:
 1. SHORT & CONCISE: Deliver compact, focused answers. Never write walls of text. Limit responses to 2-3 brief paragraphs or short bulleted items. Get straight to the point without filler introductions.
-2. WELL FORMATTED: Use clean GitHub markdown with bold key terms, concise bullet points, and high readability.
+2. CLEAN FORMATTING: Use clean, standard markdown.
+   - NEVER use triple asterisks '***' or horizontal rule dividers ('***' or '---') under any circumstances.
+   - NEVER combine bullets and asterisks as '***'. Use simple '-' for bullet items and '**text**' for bold terms.
 3. ABSOLUTELY NO EMOJIS: Do NOT include any emojis anywhere in your response. Strictly zero emojis under all circumstances.
 4. GROUNDED IN REAL DATA: Base answers on the candidate's actual resume profile and active database gigs. Never invent nonexistent gigs.
 5. DIRECT & ACTIONABLE: Provide concrete advice, skill remediation targets, or compensation negotiation strategy.
@@ -145,11 +169,11 @@ ASSISTANT:
             )
         except ValueError as ve:
             response_text = (
-                "The Peaklyy AI Career Assistant is currently offline because an LLM API key has not been configured. "
+                "Mawa is currently offline because an LLM API key has not been configured. "
                 "Please configure your LLM_API_KEY in backend/.env to start chatting."
             )
 
-        response_text = remove_emojis(response_text)
+        response_text = clean_chat_response(response_text)
 
         # 6. Record assistant message
         assistant_msg = AIMessage(

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import { LogOut } from "lucide-react";
@@ -13,7 +14,7 @@ export default function Navbar() {
     { name: "Dashboard", href: "/dashboard", icon: "dashboard" },
     { name: "Resume AI", href: "/resume/analysis", icon: "description" },
     { name: "Gig Matches", href: "/recommendations", icon: "work" },
-    { name: "Career Assistant", href: "/assistant", icon: "psychology" },
+    { name: "Mawa", href: "/assistant", icon: "psychology" },
   ];
 
   return (
@@ -22,8 +23,15 @@ export default function Navbar() {
         {/* Brand */}
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-8 h-8 rounded bg-[#e8342a] flex items-center justify-center font-black text-white text-base tracking-wider shadow-lg shadow-[#e8342a]/30 group-hover:scale-105 transition-transform font-headline">
-              P
+            <div className="relative w-9 h-9 rounded-full overflow-hidden shadow-lg shadow-[#e8342a]/20 group-hover:scale-105 transition-transform shrink-0 border border-[#353437]">
+              <Image
+                src="/peaklyy_logo.png"
+                alt="Peaklyy Logo"
+                fill
+                sizes="36px"
+                className="object-cover"
+                priority
+              />
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-bold tracking-tight text-[#e5e1e4] group-hover:text-white transition-colors font-headline">

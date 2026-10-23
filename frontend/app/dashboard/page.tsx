@@ -73,8 +73,10 @@ export default function DashboardPage() {
   const topScore = topMatch ? topMatch.match_percentage : 0;
   // Calculate dynamic profile strength score from analyzed resume
   const profileScore = latestResume?.ai_profile ? calculateResumeScore(latestResume.ai_profile) : 0;
-  const strokeDashoffset = 283 - (283 * profileScore) / 100;
-  const scoreRating = getScoreRating(profileScore);
+  const strokeDashoffset = latestResume?.ai_profile ? 283 - (283 * profileScore) / 100 : 283;
+  const scoreRating = latestResume?.ai_profile
+    ? getScoreRating(profileScore)
+    : { label: "NO RESUME INDEXED", tier: "LEVEL 0", color: "text-[#8e8c90]" };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8">
@@ -111,8 +113,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* 4 KPI Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 3 KPI Metric Cards (Engine Status tab removed) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Metric 1: Top Match */}
         <div className="p-5 rounded bg-[#1c1b1d] border border-[#353437] hover:border-[#e8342a]/40 transition-all flex flex-col justify-between">
           <div className="flex items-center justify-between text-xs font-mono-telemetry text-[#8e8c90]">
@@ -121,16 +123,16 @@ export default function DashboardPage() {
           </div>
           <div className="my-3">
             <div className="text-3xl font-extrabold font-headline text-[#e5e1e4]">
-              {topScore > 0 ? `${topScore}%` : "94%"}
+              {topScore > 0 ? `${topScore}%` : "--"}
             </div>
             <p className="text-[11px] text-[#8e8c90] font-mono-telemetry truncate mt-1">
-              {topMatch?.gig.title || "Senior Systems Architect"}
+              {topMatch ? topMatch.gig.title : "No matches computed yet"}
             </p>
           </div>
           <div className="w-full bg-[#2a2a2c] h-1.5 rounded-full overflow-hidden">
             <div
               className="bg-emerald-500 h-full rounded-full transition-all"
-              style={{ width: `${topScore > 0 ? topScore : 94}%` }}
+              style={{ width: `${topScore > 0 ? topScore : 0}%` }}
             />
           </div>
         </div>
@@ -143,15 +145,21 @@ export default function DashboardPage() {
           </div>
           <div className="my-3">
             <div className="text-3xl font-extrabold font-headline text-[#e5e1e4]">
-              {resumes.length > 0 ? resumes.length : 1}
+              {resumes.length}
             </div>
-            <p className="text-[11px] text-emerald-400 font-mono-telemetry truncate mt-1 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              {latestResume?.analysis_status.toUpperCase() || "READY // PARSED"}
+            <p className="text-[11px] font-mono-telemetry truncate mt-1 flex items-center gap-1">
+              {latestResume ? (
+                <>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span className="text-emerald-400 font-semibold">{latestResume.analysis_status.toUpperCase()}</span>
+                </>
+              ) : (
+                <span className="text-[#8e8c90]">NO RESUME UPLOADED</span>
+              )}
             </p>
           </div>
-          <div className="text-[10px] text-[#8e8c90] font-mono-telemetry">
-            LATEST: {latestResume?.file_name.slice(0, 18) || "alex_mercer.pdf"}
+          <div className="text-[10px] text-[#8e8c90] font-mono-telemetry truncate">
+            {latestResume ? `LATEST: ${latestResume.file_name}` : "AWAITING FILE UPLOAD"}
           </div>
         </div>
 
@@ -163,33 +171,14 @@ export default function DashboardPage() {
           </div>
           <div className="my-3">
             <div className="text-3xl font-extrabold font-headline text-[#e5e1e4]">
-              {recommendations.length > 0 ? recommendations.length : 142}
+              {recommendations.length}
             </div>
-            <p className="text-[11px] text-[#e8342a] font-mono-telemetry mt-1">
-              +18 VERIFIED TODAY
+            <p className="text-[11px] text-[#8e8c90] font-mono-telemetry mt-1">
+              {recommendations.length > 0 ? "CALCULATED FROM ACTIVE RESUME" : "RUN RADAR TO COMPUTE"}
             </p>
           </div>
           <div className="text-[10px] text-[#8e8c90] font-mono-telemetry">
             CONTRACT & DIRECT HIRE
-          </div>
-        </div>
-
-        {/* Metric 4: Radar Telemetry */}
-        <div className="p-5 rounded bg-[#1c1b1d] border border-[#353437] hover:border-[#e8342a]/40 transition-all flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs font-mono-telemetry text-[#8e8c90]">
-            <span>ENGINE STATUS</span>
-            <span className="material-symbols-outlined text-emerald-400 text-sm">tune</span>
-          </div>
-          <div className="my-3">
-            <div className="text-3xl font-extrabold font-headline text-emerald-400">
-              ACTIVE
-            </div>
-            <p className="text-[11px] text-[#8e8c90] font-mono-telemetry mt-1">
-              LATENCY: 0.4s (GEMMA 4)
-            </p>
-          </div>
-          <div className="text-[10px] text-[#8e8c90] font-mono-telemetry">
-            TF-IDF + COSINE HYBRID
           </div>
         </div>
       </div>
@@ -399,14 +388,14 @@ export default function DashboardPage() {
             <div className="p-3 rounded bg-[#201f22] border border-[#353437] space-y-2">
               <div className="flex items-center justify-between text-xs font-mono-telemetry">
                 <span className="text-[#e5e1e4] font-bold truncate max-w-[180px]">
-                  {latestResume?.file_name || "alex_mercer_resume.pdf"}
+                  {latestResume ? latestResume.file_name : "No Resume Uploaded"}
                 </span>
                 <span className="text-[10px] text-[#e8342a] uppercase font-bold">
-                  {latestResume?.file_type || "PDF"}
+                  {latestResume ? (latestResume.file_type || "PDF") : "--"}
                 </span>
               </div>
               <div className="text-[10px] text-[#8e8c90] font-mono-telemetry">
-                STATUS: {latestResume?.analysis_status.toUpperCase() || "ANALYZED"}
+                STATUS: {latestResume ? latestResume.analysis_status.toUpperCase() : "AWAITING UPLOAD"}
               </div>
             </div>
 
@@ -415,33 +404,42 @@ export default function DashboardPage() {
               <div className="text-[10px] font-mono-telemetry uppercase text-[#8e8c90] mb-2">
                 VERIFIED SKILLS RADAR
               </div>
-              <div className="flex flex-wrap gap-1.5">
-                {(latestResume?.ai_profile?.skills?.strongest_skills || [
-                  "Python",
-                  "FastAPI",
-                  "Next.js",
-                  "PostgreSQL",
-                  "Docker",
-                  "Distributed Systems",
-                ]).map((skill, idx) => (
-                  <span
-                    key={idx}
-                    className="px-2 py-0.5 rounded bg-[#201f22] border border-[#353437] text-[10px] font-mono-telemetry text-[#c8c6c9]"
-                  >
-                    {skill}
-                  </span>
-                ))}
-              </div>
+              {latestResume?.ai_profile?.skills?.strongest_skills && latestResume.ai_profile.skills.strongest_skills.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {latestResume.ai_profile.skills.strongest_skills.map((skill, idx) => (
+                    <span
+                      key={idx}
+                      className="px-2 py-0.5 rounded bg-[#201f22] border border-[#353437] text-[10px] font-mono-telemetry text-[#c8c6c9]"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[11px] font-mono-telemetry text-[#8e8c90]">
+                  {latestResume ? "No prominent skills identified yet." : "Upload a resume to analyze proficiencies & skills."}
+                </p>
+              )}
             </div>
 
-            {/* Button to Full Analysis */}
-            <Link
-              href={latestResume ? `/resume/analysis?id=${latestResume.id}` : "/resume/analysis"}
-              className="w-full btn-secondary-stitch text-xs py-2 flex items-center justify-center gap-2 block text-center"
-            >
-              <span>OPEN FULL DIAGNOSTIC</span>
-              <span className="material-symbols-outlined text-xs">arrow_forward</span>
-            </Link>
+            {/* Button to Full Analysis or Upload */}
+            {latestResume ? (
+              <Link
+                href={`/resume/analysis?id=${latestResume.id}`}
+                className="w-full btn-secondary-stitch text-xs py-2 flex items-center justify-center gap-2 block text-center"
+              >
+                <span>OPEN FULL DIAGNOSTIC</span>
+                <span className="material-symbols-outlined text-xs">arrow_forward</span>
+              </Link>
+            ) : (
+              <Link
+                href="/resume/upload"
+                className="w-full btn-primary-stitch text-xs py-2 flex items-center justify-center gap-2 block text-center"
+              >
+                <span className="material-symbols-outlined text-xs">upload_file</span>
+                <span>UPLOAD FIRST RESUME</span>
+              </Link>
+            )}
           </div>
 
           {/* Card 2: AI Career Assistant Shortcuts */}
@@ -452,7 +450,7 @@ export default function DashboardPage() {
               </div>
               <div>
                 <h4 className="text-xs font-bold font-headline uppercase text-[#e5e1e4]">
-                  NEURAL CAREER COPILOT
+                  MAWA // AI COPILOT
                 </h4>
                 <p className="text-[10px] text-[#8e8c90] font-mono-telemetry">
                   Direct context into your profile & gigs
@@ -466,7 +464,7 @@ export default function DashboardPage() {
 
             <div className="space-y-2">
               <Link
-                href="/assistant?prompt=Explain%20why%20I%20matched%20highest%20with%20Veritas%20Cloud"
+                href="/assistant?prompt=Explain%20why%20I%20matched%20highest%20with%20my%20top%20recommended%20gig"
                 className="p-2.5 rounded bg-[#201f22] border border-[#353437] hover:border-[#e8342a]/40 text-xs font-mono-telemetry text-[#c8c6c9] hover:text-white flex items-center justify-between transition-colors block"
               >
                 <span className="truncate">"Explain why I matched with top gig"</span>
@@ -485,7 +483,7 @@ export default function DashboardPage() {
               href="/assistant"
               className="w-full btn-primary-stitch text-xs py-2 flex items-center justify-center gap-2 block text-center"
             >
-              <span>LAUNCH CAREER ASSISTANT</span>
+              <span>LAUNCH MAWA</span>
             </Link>
           </div>
         </div>

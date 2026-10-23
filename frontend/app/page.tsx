@@ -21,7 +21,7 @@ export default function LandingPage() {
 
         <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded bg-[#201f22] border border-[#353437] text-[#e8342a] text-xs font-mono-telemetry font-bold mb-8">
           <span className="w-2 h-2 rounded-full bg-[#e8342a] animate-pulse" />
-          <span>CAREER RADAR // NEURAL COPILOT 2.4</span>
+          <span>CAREER RADAR // MAWA COPILOT 2.4</span>
         </div>
 
         <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight max-w-4xl mx-auto leading-tight sm:leading-none mb-6 font-headline text-[#e5e1e4]">
@@ -70,7 +70,7 @@ export default function LandingPage() {
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-xs font-headline font-bold text-[#e5e1e4]">
               <span className="material-symbols-outlined text-xs text-[#ffb4aa]">psychology</span>
-              <span>NEURAL COPILOT</span>
+              <span>MAWA COPILOT</span>
             </div>
             <p className="text-[11px] font-mono-telemetry text-[#8e8c90]">Contextual career negotiation & prep.</p>
           </div>
@@ -147,7 +147,7 @@ export default function LandingPage() {
                 <span className="material-symbols-outlined text-xl">psychology</span>
               </div>
               <h3 className="text-base font-bold font-headline uppercase text-[#e5e1e4]">
-                03. NEURAL CAREER COPILOT
+                03. MAWA CAREER COPILOT
               </h3>
               <p className="text-xs text-[#8e8c90] font-mono-telemetry leading-relaxed">
                 A conversational advisor with real-time context of your analyzed resume, strengths, and targeted contract specifications.
@@ -157,7 +157,7 @@ export default function LandingPage() {
               href="/assistant"
               className="text-xs font-mono-telemetry text-[#e8342a] flex items-center gap-1 group-hover:translate-x-1 transition-transform"
             >
-              <span>OPEN ASSISTANT CHAT</span>
+              <span>CHAT WITH MAWA</span>
               <span className="material-symbols-outlined text-xs">arrow_forward</span>
             </Link>
           </div>

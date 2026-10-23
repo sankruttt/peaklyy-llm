@@ -2,22 +2,64 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../services/api";
 import { ChatConversation, ChatMessage } from "../types";
+import FormattedMessage from "./FormattedMessage";
 
 export default function ChatBubble() {
+  const pathname = usePathname();
   const { user, isAuthenticated } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const [isFullScreen, setIsFullScreen] = useState(false);
+
+  // Floating coordinates for draggable closed trigger button and open window
+  const [btnPos, setBtnPos] = useState<{ x: number; y: number } | null>(null);
+  const [winPos, setWinPos] = useState<{ x: number; y: number } | null>(null);
 
   const [conversations, setConversations] = useState<ChatConversation[]>([]);
   const [currentConversationId, setCurrentConversationId] = useState<number | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [latestResumeName, setLatestResumeName] = useState<string>("alex_mercer.pdf");
+  const [latestResumeName, setLatestResumeName] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Initialize floating positions on client mount and track viewport resize
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const defaultBtnX = window.innerWidth - 80;
+      const defaultBtnY = window.innerHeight - 80;
+      setBtnPos({ x: Math.max(16, defaultBtnX), y: Math.max(16, defaultBtnY) });
+
+      const winWidth = Math.min(420, window.innerWidth - 32);
+      const defaultWinX = window.innerWidth - winWidth - 24;
+      const defaultWinY = Math.max(20, window.innerHeight - 620);
+      setWinPos({ x: Math.max(16, defaultWinX), y: defaultWinY });
+    }
+
+    const handleResize = () => {
+      if (typeof window === "undefined") return;
+      setBtnPos((prev) => {
+        if (!prev) return null;
+        return {
+          x: Math.max(12, Math.min(window.innerWidth - 72, prev.x)),
+          y: Math.max(12, Math.min(window.innerHeight - 72, prev.y)),
+        };
+      });
+      setWinPos((prev) => {
+        if (!prev) return null;
+        const width = Math.min(420, window.innerWidth - 32);
+        return {
+          x: Math.max(12, Math.min(window.innerWidth - width - 12, prev.x)),
+          y: Math.max(12, Math.min(window.innerHeight - 150, prev.y)),
+        };
+      });
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     if (isOpen && isAuthenticated) {
@@ -48,7 +90,7 @@ export default function ChatBubble() {
             id: 0,
             conversation_id: 0,
             role: "assistant",
-            content: `Hello ${user?.name ? user.name.split(" ")[0] : "Engineer"}. I am your Peaklyy Career Copilot. Ask me about your match ratings, resume improvements, or interview preparation.`,
+            content: `Hello ${user?.name ? user.name.split(" ")[0] : "Engineer"}. I am Mawa, your AI Career Copilot. Ask me about your match ratings, resume improvements, or interview preparation.`,
             created_at: new Date().toISOString(),
           },
         ]);
@@ -61,11 +103,12 @@ export default function ChatBubble() {
   const selectConversation = async (convId: number) => {
     try {
       setLoading(true);
-      setCurrentConversationId(convId);
       const conv = await api.getConversation(convId);
+      setCurrentConversationId(conv.id);
       setMessages(conv.messages || []);
     } catch (err) {
-      console.error("Failed to select conversation:", err);
+      console.warn("Failed to select conversation:", err);
+      setCurrentConversationId(null);
     } finally {
       setLoading(false);
     }
@@ -123,6 +166,88 @@ export default function ChatBubble() {
     ]);
   };
 
+  // Drag logic for Closed Floating Trigger Button
+  const handleBtnDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    const isTouch = "touches" in e;
+    const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+    const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+
+    const curX = btnPos ? btnPos.x : window.innerWidth - 80;
+    const curY = btnPos ? btnPos.y : window.innerHeight - 80;
+
+    let hasDragged = false;
+    const startX = clientX;
+    const startY = clientY;
+
+    const handleMove = (moveEvt: MouseEvent | TouchEvent) => {
+      const moveX = "touches" in moveEvt ? moveEvt.touches[0].clientX : moveEvt.clientX;
+      const moveY = "touches" in moveEvt ? moveEvt.touches[0].clientY : moveEvt.clientY;
+      const dx = moveX - startX;
+      const dy = moveY - startY;
+
+      if (Math.hypot(dx, dy) > 5) {
+        hasDragged = true;
+      }
+
+      const newX = Math.max(12, Math.min(window.innerWidth - 72, curX + dx));
+      const newY = Math.max(12, Math.min(window.innerHeight - 72, curY + dy));
+      setBtnPos({ x: newX, y: newY });
+    };
+
+    const handleEnd = () => {
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleEnd);
+      window.removeEventListener("touchmove", handleMove);
+      window.removeEventListener("touchend", handleEnd);
+
+      if (!hasDragged) {
+        setIsOpen(true);
+      }
+    };
+
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleEnd);
+    window.addEventListener("touchmove", handleMove);
+    window.addEventListener("touchend", handleEnd);
+  };
+
+  // Drag logic for Open Chat Window
+  const handleWinDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    const isTouch = "touches" in e;
+    const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+    const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+
+    const modalWidth = Math.min(420, window.innerWidth - 32);
+    const curX = winPos ? winPos.x : window.innerWidth - modalWidth - 24;
+    const curY = winPos ? winPos.y : window.innerHeight - 620;
+
+    const startX = clientX;
+    const startY = clientY;
+
+    const handleMove = (moveEvt: MouseEvent | TouchEvent) => {
+      const moveX = "touches" in moveEvt ? moveEvt.touches[0].clientX : moveEvt.clientX;
+      const moveY = "touches" in moveEvt ? moveEvt.touches[0].clientY : moveEvt.clientY;
+      const dx = moveX - startX;
+      const dy = moveY - startY;
+
+      const newX = Math.max(12, Math.min(window.innerWidth - modalWidth - 12, curX + dx));
+      const newY = Math.max(12, Math.min(window.innerHeight - 100, curY + dy));
+      setWinPos({ x: newX, y: newY });
+    };
+
+    const handleEnd = () => {
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleEnd);
+      window.removeEventListener("touchmove", handleMove);
+      window.removeEventListener("touchend", handleEnd);
+    };
+
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleEnd);
+    window.addEventListener("touchmove", handleMove);
+    window.addEventListener("touchend", handleEnd);
+  };
+
   const quickPrompts = [
     "Analyze gap for Top Match",
     "Generate technical pitch",
@@ -130,88 +255,100 @@ export default function ChatBubble() {
     "Salary negotiation leverage",
   ];
 
+  // If already on the dedicated full page assistant, do not render the floating bubble
+  if (pathname === "/assistant") return null;
+
   return (
     <>
-      {/* Floating Action Button (FAB) on Bottom-Right */}
+      {/* Floatable / Draggable Action Button (Closed State) */}
       {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          aria-label="Open AI Career Copilot"
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-[#1c1b1d] border-2 border-[#e8342a] shadow-[0_0_24px_rgba(232,52,42,0.45)] hover:shadow-[0_0_32px_rgba(232,52,42,0.7)] hover:scale-105 active:scale-95 transition-all flex items-center justify-center text-white group"
+        <div
+          onMouseDown={handleBtnDragStart}
+          onTouchStart={handleBtnDragStart}
+          style={
+            btnPos
+              ? { left: `${btnPos.x}px`, top: `${btnPos.y}px` }
+              : undefined
+          }
+          className={`fixed z-50 select-none cursor-grab active:cursor-grabbing ${
+            !btnPos ? "bottom-6 right-6" : ""
+          }`}
+          title="Drag to move around or click to open Mawa"
         >
-          <span className="material-symbols-outlined text-2xl group-hover:rotate-12 transition-transform text-[#e8342a]">
-            psychology
-          </span>
-          <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-[#1c1b1d] animate-pulse" />
-        </button>
+          <div className="relative w-14 h-14 rounded-full bg-[#1c1b1d] border-2 border-[#e8342a] shadow-[0_0_24px_rgba(232,52,42,0.45)] hover:shadow-[0_0_32px_rgba(232,52,42,0.7)] hover:scale-105 active:scale-95 transition-transform flex items-center justify-center text-white group">
+            <span className="material-symbols-outlined text-2xl group-hover:rotate-12 transition-transform text-[#e8342a]">
+              psychology
+            </span>
+            <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-[#1c1b1d] animate-pulse" />
+          </div>
+        </div>
       )}
 
-      {/* Interactive Chat Window (Bubble Popup or Full Screen) */}
+      {/* Floatable / Draggable Interactive Chat Window */}
       {isOpen && (
         <div
-          className={
-            isFullScreen
-              ? "fixed inset-2 sm:inset-6 z-50 bg-[#1c1b1d] border border-[#353437] rounded-2xl shadow-2xl flex flex-col overflow-hidden backdrop-blur-2xl animate-in zoom-in-95 duration-200"
-              : "fixed bottom-6 right-4 sm:right-6 z-50 w-[360px] sm:w-[420px] h-[580px] max-h-[82vh] bg-[#1c1b1d] border border-[#353437] rounded-xl shadow-2xl flex flex-col overflow-hidden backdrop-blur-2xl animate-in slide-in-from-bottom-4 duration-200"
+          style={
+            winPos
+              ? { left: `${winPos.x}px`, top: `${winPos.y}px` }
+              : undefined
           }
+          className={`fixed z-50 w-[360px] sm:w-[420px] h-[580px] max-h-[85vh] bg-[#1c1b1d] border border-[#353437] rounded-xl shadow-2xl flex flex-col overflow-hidden backdrop-blur-2xl animate-in slide-in-from-bottom-4 duration-200 ${
+            !winPos ? "bottom-6 right-4 sm:right-6" : ""
+          }`}
         >
-          {/* Header */}
-          <div className="p-3.5 bg-[#201f22] border-b border-[#353437] flex items-center justify-between gap-3 shrink-0">
-            <div className="flex items-center gap-2.5 min-w-0">
+          {/* Header with Drag Handle */}
+          <div className="p-3 bg-[#201f22] border-b border-[#353437] flex items-center justify-between gap-3 shrink-0">
+            {/* Header Drag Handle */}
+            <div
+              onMouseDown={handleWinDragStart}
+              onTouchStart={handleWinDragStart}
+              className="flex items-center gap-2 min-w-0 flex-1 select-none cursor-grab active:cursor-grabbing"
+              title="Click and drag to move chat window"
+            >
+              <span className="material-symbols-outlined text-sm text-[#8e8c90] hover:text-white shrink-0">
+                drag_indicator
+              </span>
               <div className="w-7 h-7 rounded bg-[#e8342a] flex items-center justify-center text-white text-xs font-black font-headline shrink-0">
-                P
+                M
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <h3 className="text-xs font-bold font-headline uppercase text-[#e5e1e4] truncate">
-                    CAREER COPILOT
+                    MAWA
                   </h3>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
                 </div>
                 <p className="text-[10px] font-mono-telemetry text-[#8e8c90] truncate">
-                  CONTEXT: {latestResumeName}
+                  CONTEXT: {latestResumeName || "GLOBAL MAWA"}
                 </p>
               </div>
             </div>
 
-            {/* Header Action Controls */}
-            <div className="flex items-center gap-1">
-              {/* New chat */}
+            {/* Header Action Controls - Exactly 3 buttons: New Chat, Take to Full Page, Close */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              {/* 1. New Chat */}
               <button
                 onClick={startNewChat}
-                title="Start New Chat"
+                title="New Chat"
                 className="w-7 h-7 rounded hover:bg-[#2a2a2c] text-[#8e8c90] hover:text-[#e5e1e4] flex items-center justify-center transition-colors text-xs"
               >
                 <span className="material-symbols-outlined text-sm">edit_square</span>
               </button>
 
-              {/* Expand / Collapse Full Screen */}
-              <button
-                onClick={() => setIsFullScreen(!isFullScreen)}
-                title={isFullScreen ? "Collapse to Bubble" : "Expand to Full Page"}
-                className="w-7 h-7 rounded hover:bg-[#2a2a2c] text-[#8e8c90] hover:text-[#e5e1e4] flex items-center justify-center transition-colors text-xs"
-              >
-                <span className="material-symbols-outlined text-sm">
-                  {isFullScreen ? "close_fullscreen" : "open_in_full"}
-                </span>
-              </button>
-
-              {/* Dedicated /assistant Page Link */}
+              {/* 2. Take to Full Page */}
               <Link
-                href="/assistant"
-                title="Open Dedicated Full Page"
+                href={currentConversationId ? `/assistant?c=${currentConversationId}` : "/assistant"}
+                onClick={() => setIsOpen(false)}
+                title="Take to Full Page"
                 className="w-7 h-7 rounded hover:bg-[#2a2a2c] text-[#8e8c90] hover:text-[#e5e1e4] flex items-center justify-center transition-colors text-xs"
               >
-                <span className="material-symbols-outlined text-sm">launch</span>
+                <span className="material-symbols-outlined text-sm">open_in_new</span>
               </Link>
 
-              {/* Close Button */}
+              {/* 3. Close Bubble */}
               <button
-                onClick={() => {
-                  setIsOpen(false);
-                  setIsFullScreen(false);
-                }}
-                title="Minimize Bubble"
+                onClick={() => setIsOpen(false)}
+                title="Close Bubble"
                 className="w-7 h-7 rounded hover:bg-[#e8342a]/20 text-[#8e8c90] hover:text-[#e8342a] flex items-center justify-center transition-colors text-xs"
               >
                 <span className="material-symbols-outlined text-sm">close</span>
@@ -244,7 +381,7 @@ export default function ChatBubble() {
                 >
                   {isAssistant && (
                     <div className="w-6 h-6 rounded bg-[#201f22] border border-[#353437] flex items-center justify-center text-[#e8342a] shrink-0 text-[11px] font-bold">
-                      P
+                      M
                     </div>
                   )}
 
@@ -255,7 +392,7 @@ export default function ChatBubble() {
                         : "bg-[#2a2a2c] text-white border border-[#e8342a]/30"
                     }`}
                   >
-                    <div className="whitespace-pre-wrap font-sans">{m.content}</div>
+                    <FormattedMessage content={m.content} />
                     <div className="text-[9px] font-mono-telemetry text-[#8e8c90] mt-1.5 text-right">
                       {new Date(m.created_at).toLocaleTimeString([], {
                         hour: "2-digit",
@@ -289,7 +426,7 @@ export default function ChatBubble() {
                 type="text"
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
-                placeholder="Ask Career Copilot..."
+                placeholder="Ask Mawa..."
                 disabled={loading}
                 className="flex-1 bg-[#1c1b1d] border border-[#353437] focus:border-[#e8342a] rounded px-3 py-2 text-xs text-[#e5e1e4] placeholder-[#8e8c90] focus:outline-none transition-colors"
               />

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 
@@ -50,9 +51,16 @@ export default function RegisterPage() {
     <div className="flex-1 flex items-center justify-center px-4 py-16">
       <div className="w-full max-w-md">
         <div className="p-8 sm:p-10 rounded bg-[#1c1b1d] border border-[#353437] shadow-2xl space-y-6">
-          <div className="text-center space-y-2">
-            <div className="w-10 h-10 rounded bg-[#e8342a] flex items-center justify-center text-white mx-auto shadow-lg shadow-[#e8342a]/30">
-              <span className="material-symbols-outlined text-xl">person_add</span>
+          <div className="text-center space-y-3">
+            <div className="relative w-14 h-14 rounded-full overflow-hidden mx-auto shadow-xl shadow-[#e8342a]/20 border border-[#353437]">
+              <Image
+                src="/peaklyy_logo.png"
+                alt="Peaklyy Logo"
+                fill
+                sizes="56px"
+                className="object-cover"
+                priority
+              />
             </div>
             <h1 className="text-2xl font-bold font-headline uppercase text-[#e5e1e4]">
               INITIALIZE NEW ENGINEER NODE

@@ -10,6 +10,69 @@ from app.services.ai.llm_service import llm_service
 
 logger = logging.getLogger(__name__)
 
+def generate_match_synthesis(
+    match_data: dict,
+    profile: AIResumeProfile,
+    gig: Gig
+) -> str:
+    """
+    Synthesizes a realistic, truthful explanation of how the candidate's actual resume skills
+    align with the specific gig requirements, without false assertions or generic placeholders.
+    """
+    matched_skills = match_data.get("matched_skills", [])
+    missing_skills = match_data.get("missing_skills", [])
+    match_percentage = match_data.get("match_percentage", 0.0)
+    matched_count = len(matched_skills)
+    missing_count = len(missing_skills)
+
+    skills_data = profile.skills or {}
+    candidate_top = (
+        skills_data.get("strongest_skills")
+        or skills_data.get("programming_languages", [])
+        or skills_data.get("technical_skills", [])
+    )
+
+    # 1. Zero skills matched (Ineligible)
+    if matched_count == 0:
+        top_str = ", ".join(candidate_top[:3]) if candidate_top else "general software development"
+        miss_str = ", ".join(missing_skills[:3]) if missing_skills else "role prerequisites"
+        return (
+            f"Minimal technical overlap. Your resume highlights {top_str}, "
+            f"whereas this {gig.category} contract strictly requires {miss_str}."
+        )
+
+    # 2. Exceptional / Strong match (>= 75% or all required skills satisfied)
+    if match_percentage >= 75.0 or (missing_count == 0 and match_percentage >= 65.0):
+        matched_str = ", ".join(matched_skills[:4])
+        if not missing_skills:
+            return (
+                f"High compatibility: your verified resume competencies in {matched_str} "
+                f"fully cover all core requirements for this {gig.experience_level} {gig.category} contract."
+            )
+        else:
+            miss_str = ", ".join(missing_skills[:2])
+            return (
+                f"Strong alignment: your resume proves hands-on mastery in {matched_str}. "
+                f"Adding {miss_str} would make your profile an ideal candidate."
+            )
+
+    # 3. Moderate fit (45% - 74%)
+    if match_percentage >= 45.0 or matched_count >= 2:
+        matched_str = ", ".join(matched_skills[:3])
+        miss_str = ", ".join(missing_skills[:3]) if missing_skills else "extended tooling"
+        return (
+            f"Moderate fit: you satisfy key requirements with {matched_str}, "
+            f"but bridging gaps in {miss_str} is necessary for full qualification in this {gig.category} position."
+        )
+
+    # 4. Limited coverage (< 45%)
+    matched_str = ", ".join(matched_skills[:2])
+    miss_str = ", ".join(missing_skills[:3])
+    return (
+        f"Limited coverage: while your background demonstrates {matched_str}, "
+        f"this {gig.experience_level} contract heavily depends on {miss_str}."
+    )
+
 class RecommendationService:
     @staticmethod
     async def generate_recommendations(user_id: int, db: Session) -> List[GigRecommendation]:
@@ -56,11 +119,8 @@ class RecommendationService:
                 gig_embedding=gig.embedding or []
             )
 
-            # Generate dynamic explanation
-            matched_str = ", ".join(match_data["matched_skills"][:4]) if match_data["matched_skills"] else "foundational competencies"
-            missing_str = f" Upskilling in {', '.join(match_data['missing_skills'][:2])} will maximize your competitiveness." if match_data["missing_skills"] else " You cover all key prerequisites!"
-            
-            explanation = f"Your experience with {matched_str} aligns strongly with this {gig.experience_level} {gig.category} role.{missing_str}"
+            # Generate dynamic truthful explanation grounded in resume skills
+            explanation = generate_match_synthesis(match_data, profile, gig)
 
             rec = GigRecommendation(
                 user_id=user_id,

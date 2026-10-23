@@ -393,7 +393,7 @@ function ResumeAnalysisContent() {
                   className="p-4 rounded bg-[#1c1b1d] border border-[#353437] hover:border-[#e8342a]/50 transition-all flex items-center justify-between"
                 >
                   <div>
-                    <div className="text-xs font-bold font-headline text-[#e5e1e4]">CONSULT CAREER COPILOT</div>
+                    <div className="text-xs font-bold font-headline text-[#e5e1e4]">CONSULT MAWA</div>
                     <div className="text-[10px] font-mono-telemetry text-[#8e8c90]">Ask tailored interview questions</div>
                   </div>
                   <span className="material-symbols-outlined text-[#e8342a]">psychology</span>

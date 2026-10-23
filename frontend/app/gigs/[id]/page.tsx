@@ -166,7 +166,7 @@ export default function GigDetailsPage() {
               className="btn-secondary-stitch text-xs px-3.5 py-1.5 flex items-center gap-1.5"
             >
               <span className="material-symbols-outlined text-xs text-[#e8342a]">psychology</span>
-              <span>ASK COPILOT ABOUT THIS GIG</span>
+              <span>ASK MAWA ABOUT THIS GIG</span>
             </Link>
           </div>
 

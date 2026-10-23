@@ -7,11 +7,13 @@ import { useAuth } from "../../context/AuthContext";
 import { api } from "../../services/api";
 import { ChatConversation, ChatMessage } from "../../types";
 import { calculateResumeScore } from "../../utils/scoring";
+import FormattedMessage from "../../components/FormattedMessage";
 
 function AssistantContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialPrompt = searchParams.get("prompt") || searchParams.get("q");
+  const convParam = searchParams.get("c") || searchParams.get("conversation_id");
 
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -22,7 +24,7 @@ function AssistantContent() {
   const [inputMessage, setInputMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [hasResume, setHasResume] = useState(false);
-  const [latestResumeName, setLatestResumeName] = useState<string>("alex_mercer.pdf");
+  const [latestResumeName, setLatestResumeName] = useState<string>("");
   const [resumeScore, setResumeScore] = useState<number>(0);
 
   useEffect(() => {
@@ -54,24 +56,15 @@ function AssistantContent() {
         }
       }
 
-      if (convs.length > 0) {
+      const targetId = convParam ? parseInt(convParam, 10) : null;
+      const targetConv = targetId && !isNaN(targetId) ? convs.find((c) => c.id === targetId) : null;
+
+      if (targetConv) {
+        await selectConversation(targetConv.id);
+      } else if (convs.length > 0) {
         await selectConversation(convs[0].id);
       } else {
-        setMessages([
-          {
-            id: 0,
-            conversation_id: 0,
-            role: "assistant",
-            content: `Hello ${
-              user?.name ? user.name.split(" ")[0] : "Engineer"
-            }. I am your Peaklyy Neural Career Copilot.\n\n${
-              resumes.length > 0
-                ? `I have indexed your resume (**${resumes[0].file_name}**) and calculated match telemetry across active gigs in the database. I can break down compensation leverage, clarify skill gap remediation, or simulate role alignment.`
-                : "No resume is currently linked to your session. Uploading your CV unlocks tailored gig compatibility telemetry and personalized interview coaching."
-            }\n\nWhat career objective or gig query shall we examine?`,
-            created_at: new Date().toISOString(),
-          },
-        ]);
+        handleStartNewChat();
       }
 
       if (initialPrompt) {
@@ -84,16 +77,21 @@ function AssistantContent() {
 
   const selectConversation = async (convId: number) => {
     try {
-      setCurrentConversationId(convId);
       const conv = await api.getConversation(convId);
+      setCurrentConversationId(conv.id);
       setMessages(conv.messages || []);
     } catch (err) {
-      console.error("Failed to load conversation:", err);
+      console.warn("Failed to load conversation, falling back:", err);
+      setCurrentConversationId(null);
+      handleStartNewChat();
     }
   };
 
   const handleStartNewChat = () => {
     setCurrentConversationId(null);
+    if (typeof window !== "undefined" && window.location.search) {
+      router.replace("/assistant");
+    }
     setMessages([
       {
         id: Date.now(),
@@ -109,9 +107,14 @@ function AssistantContent() {
     e.stopPropagation();
     try {
       await api.deleteConversation(convId);
-      setConversations((prev) => prev.filter((c) => c.id !== convId));
+      const remaining = conversations.filter((c) => c.id !== convId);
+      setConversations(remaining);
       if (currentConversationId === convId) {
-        handleStartNewChat();
+        if (remaining.length > 0) {
+          await selectConversation(remaining[0].id);
+        } else {
+          handleStartNewChat();
+        }
       }
     } catch (err) {
       console.error("Failed to delete conversation:", err);
@@ -181,16 +184,8 @@ function AssistantContent() {
       <div className="p-3 rounded bg-[#1c1b1d] border border-[#353437] flex flex-wrap items-center justify-between gap-3 text-xs font-mono-telemetry">
         <div className="flex items-center gap-3 text-[#8e8c90]">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-[#e5e1e4] font-bold">NEURAL COPILOT // ACTIVE CONTEXT:</span>
+          <span className="text-[#e5e1e4] font-bold">MAWA // ACTIVE CONTEXT:</span>
           <span className="text-[#ffb4aa] uppercase">{hasResume ? latestResumeName : "GLOBAL GUIDANCE"}</span>
-        </div>
-
-        <div className="flex items-center gap-4 text-[11px] text-[#8e8c90]">
-          <span>LATENCY: 0.4s</span>
-          <span>•</span>
-          <span>ENGINE: GEMMA 4 31B</span>
-          <span>•</span>
-          <span className="text-emerald-400">MEMORY: PERSISTED</span>
         </div>
       </div>
 
@@ -219,13 +214,13 @@ function AssistantContent() {
             {/* Profile Brief Badge */}
             <div className="p-3 rounded bg-[#201f22] border border-[#353437] space-y-1.5">
               <div className="flex items-center justify-between text-xs font-mono-telemetry">
-                <span className="text-[#e5e1e4] font-bold">{user?.name || "Alex Mercer"}</span>
+                <span className="text-[#e5e1e4] font-bold">{user?.name || "Engineer"}</span>
                 <span className="text-emerald-400 font-bold">
                   {resumeScore > 0 ? `${resumeScore} PTS` : "--"}
                 </span>
               </div>
               <div className="text-[10px] font-mono-telemetry text-[#8e8c90] truncate">
-                CONTEXT: {latestResumeName}
+                CONTEXT: {latestResumeName || "GLOBAL MAWA"}
               </div>
             </div>
 
@@ -238,11 +233,10 @@ function AssistantContent() {
                 <div
                   key={c.id}
                   onClick={() => selectConversation(c.id)}
-                  className={`p-2.5 rounded text-xs font-mono-telemetry cursor-pointer transition-all flex items-center justify-between group ${
-                    currentConversationId === c.id
-                      ? "bg-[#2a2a2c] text-white border border-[#e8342a]/60 shadow-[0_0_10px_rgba(232,52,42,0.2)]"
-                      : "text-[#8e8c90] hover:text-[#e5e1e4] hover:bg-[#201f22]"
-                  }`}
+                  className={`p-2.5 rounded text-xs font-mono-telemetry cursor-pointer transition-all flex items-center justify-between group ${currentConversationId === c.id
+                    ? "bg-[#2a2a2c] text-white border border-[#e8342a]/60 shadow-[0_0_10px_rgba(232,52,42,0.2)]"
+                    : "text-[#8e8c90] hover:text-[#e5e1e4] hover:bg-[#201f22]"
+                    }`}
                 >
                   <div className="flex items-center gap-2 truncate">
                     <span className="material-symbols-outlined text-xs text-[#8e8c90] group-hover:text-[#e8342a]">
@@ -300,13 +294,13 @@ function AssistantContent() {
               </div>
               <div>
                 <h2 className="text-xs font-bold font-headline uppercase text-[#e5e1e4] flex items-center gap-2">
-                  <span>AI CAREER COPILOT</span>
+                  <span>MAWA // AI CAREER COPILOT</span>
                   <span className="px-1.5 py-0.2 rounded bg-[#2a2a2c] border border-[#353437] text-[9px] font-mono-telemetry text-emerald-400">
                     LIVE
                   </span>
                 </h2>
                 <p className="text-[10px] font-mono-telemetry text-[#8e8c90]">
-                  Gemma 4 31B • Context-Aware Interview & Career Advisory
+                  Context-Aware Interview & Career Advisory
                 </p>
               </div>
             </div>
@@ -329,11 +323,10 @@ function AssistantContent() {
                   className={`flex items-start gap-3 ${isUser ? "flex-row-reverse" : "flex-row"}`}
                 >
                   <div
-                    className={`w-7 h-7 rounded flex items-center justify-center shrink-0 text-xs font-bold font-headline ${
-                      isUser
-                        ? "bg-[#2a2a2c] border border-[#353437] text-[#e8342a]"
-                        : "bg-[#e8342a] text-white"
-                    }`}
+                    className={`w-7 h-7 rounded flex items-center justify-center shrink-0 text-xs font-bold font-headline ${isUser
+                      ? "bg-[#2a2a2c] border border-[#353437] text-[#e8342a]"
+                      : "bg-[#e8342a] text-white"
+                      }`}
                   >
                     <span className="material-symbols-outlined text-sm">
                       {isUser ? "person" : "smart_toy"}
@@ -341,17 +334,16 @@ function AssistantContent() {
                   </div>
 
                   <div
-                    className={`max-w-[85%] sm:max-w-[80%] p-4 rounded text-xs sm:text-sm leading-relaxed ${
-                      isUser
-                        ? "bg-[#2a2a2c] text-white border border-[#353437] rounded-tr-none"
-                        : "bg-[#201f22] text-[#e5e1e4] border border-[#353437] rounded-tl-none whitespace-pre-wrap"
-                    }`}
+                    className={`max-w-[85%] sm:max-w-[80%] p-4 rounded text-xs sm:text-sm leading-relaxed ${isUser
+                      ? "bg-[#2a2a2c] text-white border border-[#353437] rounded-tr-none"
+                      : "bg-[#201f22] text-[#e5e1e4] border border-[#353437] rounded-tl-none whitespace-pre-wrap"
+                      }`}
                   >
                     <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-[#353437]/50 text-[10px] font-mono-telemetry text-[#8e8c90]">
-                      <span>{isUser ? "USER COMMAND" : "NEURAL SYNTHESIS"}</span>
+                      <span>{isUser ? "USER COMMAND" : "MAWA SYNTHESIS"}</span>
                       <span>{new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
                     </div>
-                    {m.content}
+                    <FormattedMessage content={m.content} />
                   </div>
                 </div>
               );
@@ -377,7 +369,7 @@ function AssistantContent() {
             <form onSubmit={handleSubmit} className="flex items-center gap-2">
               <input
                 type="text"
-                placeholder="Ask career copilot anything regarding your resume, gigs, or interview prep... (Press Enter)"
+                placeholder="Ask Mawa anything regarding your resume, gigs, or interview prep... (Press Enter)"
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 className="flex-1 px-4 py-2.5 rounded bg-[#201f22] border border-[#353437] focus:border-[#e8342a] focus:outline-none text-xs font-mono-telemetry text-[#e5e1e4] placeholder-[#8e8c90] transition-all"

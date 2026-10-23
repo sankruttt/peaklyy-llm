@@ -1,12 +1,129 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../services/api";
 import { GigRecommendation } from "../../types";
 import { formatINR } from "../../utils/currency";
+
+function HeadTailSlider({
+  min,
+  max,
+  onChangeMin,
+  onChangeMax,
+}: {
+  min: number;
+  max: number;
+  onChangeMin: (val: number) => void;
+  onChangeMax: (val: number) => void;
+}) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [activeThumb, setActiveThumb] = useState<"head" | "tail" | null>(null);
+
+  const calcPercent = (clientX: number) => {
+    if (!trackRef.current) return 0;
+    const rect = trackRef.current.getBoundingClientRect();
+    const raw = ((clientX - rect.left) / rect.width) * 100;
+    return Math.round(Math.max(0, Math.min(100, raw)));
+  };
+
+  const handlePointerDown = (thumb: "head" | "tail", e: React.PointerEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setActiveThumb(thumb);
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!activeThumb) return;
+    const p = calcPercent(e.clientX);
+    if (activeThumb === "head") {
+      onChangeMin(Math.min(p, max));
+    } else {
+      onChangeMax(Math.max(p, min));
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (activeThumb) {
+      try {
+        (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+      } catch {}
+      setActiveThumb(null);
+    }
+  };
+
+  const handleTrackClick = (e: React.MouseEvent) => {
+    const p = calcPercent(e.clientX);
+    const distHead = Math.abs(p - min);
+    const distTail = Math.abs(p - max);
+    if (distHead < distTail) {
+      onChangeMin(Math.min(p, max));
+    } else {
+      onChangeMax(Math.max(p, min));
+    }
+  };
+
+  return (
+    <div className="select-none py-1">
+      {/* Clean Single Line Track with Head and Tail Thumbs */}
+      <div className="relative py-2">
+        <div
+          ref={trackRef}
+          onClick={handleTrackClick}
+          className="relative h-2 bg-[#141315] rounded-full border border-[#353437] cursor-pointer"
+        >
+          {/* Active colored line segment connecting Head to Tail */}
+          <div
+            className="absolute top-0 bottom-0 bg-gradient-to-r from-[#e8342a] via-[#f59e0b] to-[#10b981] rounded-full pointer-events-none"
+            style={{
+              left: `${min}%`,
+              width: `${Math.max(0, max - min)}%`,
+            }}
+          />
+
+          {/* HEAD THUMB (Starting Point) */}
+          <div
+            onPointerDown={(e) => handlePointerDown("head", e)}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            style={{ left: `${min}%` }}
+            className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 touch-none cursor-grab active:cursor-grabbing p-2 -m-2"
+          >
+            <div
+              className={`w-4 h-4 rounded-full bg-[#e8342a] border-2 border-white shadow-[0_0_10px_rgba(232,52,42,0.8)] transition-transform flex items-center justify-center ${
+                activeThumb === "head" ? "scale-125" : "hover:scale-110"
+              }`}
+            >
+              <div className="w-1.5 h-1.5 rounded-full bg-white" />
+            </div>
+          </div>
+
+          {/* TAIL THUMB (Ending Point) */}
+          <div
+            onPointerDown={(e) => handlePointerDown("tail", e)}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            style={{ left: `${max}%` }}
+            className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 touch-none cursor-grab active:cursor-grabbing p-2 -m-2"
+          >
+            <div
+              className={`w-4 h-4 rounded-full bg-[#10b981] border-2 border-white shadow-[0_0_10px_rgba(16,185,129,0.8)] transition-transform flex items-center justify-center ${
+                activeThumb === "tail" ? "scale-125" : "hover:scale-110"
+              }`}
+            >
+              <div className="w-1.5 h-1.5 rounded-full bg-white" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function RecommendationsPage() {
   const router = useRouter();
@@ -18,7 +135,11 @@ export default function RecommendationsPage() {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
   const [eligibilityFilter, setEligibilityFilter] = useState("all");
-  const [minMatchScore, setMinMatchScore] = useState<number>(0);
+  const [minScore, setMinScore] = useState<number>(0);
+  const [maxScore, setMaxScore] = useState<number>(100);
+  const [sortBy, setSortBy] = useState<
+    "match_desc" | "match_asc" | "comp_desc" | "comp_asc" | "title_asc"
+  >("match_desc");
   const [appliedGigs, setAppliedGigs] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
@@ -60,6 +181,66 @@ export default function RecommendationsPage() {
     alert(`Application successfully submitted for "${gigTitle}"!`);
   };
 
+  const updateEligibilityFromScores = (min: number, max: number) => {
+    if (min === 0 && max === 100) {
+      setEligibilityFilter("all");
+    } else if (min === 70 && max === 100) {
+      setEligibilityFilter("eligible");
+    } else if (min === 40 && max === 69) {
+      setEligibilityFilter("partially");
+    } else {
+      setEligibilityFilter("custom");
+    }
+  };
+
+  const handleMinScoreChange = (val: number) => {
+    const clamped = Math.max(0, Math.min(100, val));
+    if (clamped > maxScore) {
+      setMaxScore(clamped);
+    }
+    setMinScore(clamped);
+    updateEligibilityFromScores(clamped, Math.max(clamped, maxScore));
+  };
+
+  const handleMaxScoreChange = (val: number) => {
+    const clamped = Math.max(0, Math.min(100, val));
+    if (clamped < minScore) {
+      setMinScore(clamped);
+    }
+    setMaxScore(clamped);
+    updateEligibilityFromScores(Math.min(clamped, minScore), clamped);
+  };
+
+  const handleEligibilityTab = (tabId: string) => {
+    setEligibilityFilter(tabId);
+    if (tabId === "all") {
+      setMinScore(0);
+      setMaxScore(100);
+    } else if (tabId === "eligible") {
+      setMinScore(70);
+      setMaxScore(100);
+    } else if (tabId === "partially") {
+      setMinScore(40);
+      setMaxScore(69);
+    }
+  };
+
+  const handleResetFilters = () => {
+    setSearch("");
+    setCategoryFilter("ALL");
+    setEligibilityFilter("all");
+    setMinScore(0);
+    setMaxScore(100);
+    setSortBy("match_desc");
+  };
+
+  const parseCompensation = (compStr: string): number => {
+    if (!compStr) return 0;
+    const nums = compStr.replace(/,/g, "").match(/\d+/g);
+    if (!nums || nums.length === 0) return 0;
+    return Number(nums[nums.length - 1]);
+  };
+
   const categoryPills = [
     { label: "ALL ROLES", value: "ALL" },
     { label: "FRONTEND", value: "frontend" },
@@ -70,26 +251,31 @@ export default function RecommendationsPage() {
     { label: "UI/UX", value: "ui/ux" },
   ];
 
-  const filteredRecs = recommendations.filter((r) => {
-    const matchesSearch =
-      r.gig.title.toLowerCase().includes(search.toLowerCase()) ||
-      r.gig.category.toLowerCase().includes(search.toLowerCase()) ||
-      (r.gig.company ? r.gig.company.toLowerCase().includes(search.toLowerCase()) : false) ||
-      r.gig.required_skills.some((s) => s.toLowerCase().includes(search.toLowerCase()));
+  const filteredRecs = recommendations
+    .filter((r) => {
+      const matchesSearch =
+        r.gig.title.toLowerCase().includes(search.toLowerCase()) ||
+        r.gig.category.toLowerCase().includes(search.toLowerCase()) ||
+        (r.gig.company ? r.gig.company.toLowerCase().includes(search.toLowerCase()) : false) ||
+        r.gig.required_skills.some((s) => s.toLowerCase().includes(search.toLowerCase()));
 
-    const matchesCategory =
-      categoryFilter === "ALL" ||
-      r.gig.category.toLowerCase().includes(categoryFilter.toLowerCase());
+      const matchesCategory =
+        categoryFilter === "ALL" ||
+        r.gig.category.toLowerCase().includes(categoryFilter.toLowerCase());
 
-    const matchesEligibility =
-      eligibilityFilter === "all" ||
-      (eligibilityFilter === "eligible" && r.match_percentage >= 70) ||
-      (eligibilityFilter === "partially" && r.match_percentage < 70 && r.match_percentage >= 40);
+      const matchesScoreRange =
+        r.match_percentage >= minScore && r.match_percentage <= maxScore;
 
-    const matchesMinScore = r.match_percentage >= minMatchScore;
-
-    return matchesSearch && matchesCategory && matchesEligibility && matchesMinScore;
-  });
+      return matchesSearch && matchesCategory && matchesScoreRange;
+    })
+    .sort((a, b) => {
+      if (sortBy === "match_desc") return b.match_percentage - a.match_percentage;
+      if (sortBy === "match_asc") return a.match_percentage - b.match_percentage;
+      if (sortBy === "comp_desc") return parseCompensation(b.gig.compensation) - parseCompensation(a.gig.compensation);
+      if (sortBy === "comp_asc") return parseCompensation(a.gig.compensation) - parseCompensation(b.gig.compensation);
+      if (sortBy === "title_asc") return a.gig.title.localeCompare(b.gig.title);
+      return 0;
+    });
 
   if (authLoading || loading) {
     return (
@@ -177,12 +363,12 @@ export default function RecommendationsPage() {
           <div className="flex items-center gap-1 bg-[#201f22] p-1 rounded border border-[#353437] w-full md:w-auto">
             {[
               { id: "all", label: "ALL MATCHES" },
-              { id: "eligible", label: "ELIGIBLE ≥70%" },
-              { id: "partially", label: "PARTIAL 40-69%" },
+              { id: "eligible", label: "ELIGIBLE" },
+              { id: "partially", label: "PARTIAL" },
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setEligibilityFilter(tab.id)}
+                onClick={() => handleEligibilityTab(tab.id)}
                 className={`flex-1 md:flex-none px-3 py-1 rounded text-xs font-semibold font-mono-telemetry transition-all ${
                   eligibilityFilter === tab.id
                     ? "bg-[#2a2a2c] text-white border border-[#e8342a]/60 shadow-[0_0_10px_rgba(232,52,42,0.2)]"
@@ -222,9 +408,11 @@ export default function RecommendationsPage() {
         <div className="lg:col-span-8 space-y-4">
           <div className="flex items-center justify-between text-xs font-mono-telemetry text-[#8e8c90] pb-2">
             <span>
-              DISPLAYING {filteredRecs.length} VERIFIED MATCHES
+              DISPLAYING <strong className="text-[#e5e1e4]">{filteredRecs.length}</strong> VERIFIED MATCHES
             </span>
-            <span>SORT: COMPATIBILITY DESCENDING</span>
+            <span className="text-[11px] text-[#8e8c90] uppercase tracking-wider">
+              RADAR ACTIVE
+            </span>
           </div>
 
           {filteredRecs.length > 0 ? (
@@ -350,12 +538,7 @@ export default function RecommendationsPage() {
                 Adjust your search query or reset minimum match thresholds to explore additional database contracts.
               </p>
               <button
-                onClick={() => {
-                  setSearch("");
-                  setCategoryFilter("ALL");
-                  setEligibilityFilter("all");
-                  setMinMatchScore(0);
-                }}
+                onClick={handleResetFilters}
                 className="btn-secondary-stitch text-xs px-4 py-2"
               >
                 RESET FILTERS
@@ -375,37 +558,86 @@ export default function RecommendationsPage() {
                 </h3>
               </div>
               <button
-                onClick={() => {
-                  setSearch("");
-                  setCategoryFilter("ALL");
-                  setEligibilityFilter("all");
-                  setMinMatchScore(0);
-                }}
+                onClick={handleResetFilters}
                 className="text-[10px] font-mono-telemetry text-[#e8342a] hover:underline"
               >
                 RESET
               </button>
             </div>
 
-            {/* Instant Match Minimum Score Slider */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs font-mono-telemetry">
-                <span className="text-[#8e8c90]">MIN MATCH COMPATIBILITY:</span>
-                <span className="text-white font-bold">{minMatchScore}%</span>
+            {/* Sort Dropdown */}
+            <div className="space-y-1.5 pb-3 border-b border-[#2a2a2c]">
+              <label htmlFor="sidebar-sort-select" className="text-[11px] font-mono-telemetry text-[#8e8c90] uppercase block">
+                SORT CONTRACTS:
+              </label>
+              <div className="relative">
+                <select
+                  id="sidebar-sort-select"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="w-full bg-[#201f22] border border-[#353437] hover:border-[#8e8c90] text-[#e5e1e4] text-xs font-mono-telemetry rounded px-3 py-2 pr-8 appearance-none focus:outline-none focus:border-[#e8342a] cursor-pointer transition-colors"
+                >
+                  <option value="match_desc">Match %: High to Low (Best Match)</option>
+                  <option value="match_asc">Match %: Low to High</option>
+                  <option value="comp_desc">Compensation: High to Low</option>
+                  <option value="comp_asc">Compensation: Low to High</option>
+                  <option value="title_asc">Role Title (A to Z)</option>
+                </select>
+                <span className="material-symbols-outlined text-xs text-[#8e8c90] pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2">
+                  expand_more
+                </span>
               </div>
-              <input
-                type="range"
-                min="0"
-                max="90"
-                step="5"
-                value={minMatchScore}
-                onChange={(e) => setMinMatchScore(parseInt(e.target.value))}
-                className="w-full accent-[#e8342a] cursor-pointer"
+            </div>
+
+            {/* Match Compatibility Head & Tail Slider on a Single Line */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-xs font-mono-telemetry">
+                <span className="text-[11px] font-mono-telemetry text-[#8e8c90] uppercase">
+                  MATCH COMPATIBILITY:
+                </span>
+                <span className="text-[10px] font-mono-telemetry text-[#8e8c90] flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#e8342a]"></span> HEAD
+                  <span className="text-[#525054]">—</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]"></span> TAIL
+                </span>
+              </div>
+
+              {/* Unified Head & Tail Slider on a Single Line */}
+              <HeadTailSlider
+                min={minScore}
+                max={maxScore}
+                onChangeMin={handleMinScoreChange}
+                onChangeMax={handleMaxScoreChange}
               />
-              <div className="flex justify-between text-[10px] font-mono-telemetry text-[#8e8c90]">
-                <span>0%</span>
-                <span>50%</span>
-                <span>90%</span>
+
+              {/* Quick Presets */}
+              <div className="grid grid-cols-2 gap-1.5 pt-1">
+                {[
+                  { label: "ALL ROLES", min: 0, max: 100, filter: "all" },
+                  { label: "HIGH FIT", min: 70, max: 100, filter: "eligible" },
+                  { label: "PARTIAL FIT", min: 40, max: 69, filter: "partially" },
+                  { label: "PRIME FIT", min: 85, max: 100, filter: "custom" },
+                ].map((preset) => {
+                  const isActive = minScore === preset.min && maxScore === preset.max;
+                  return (
+                    <button
+                      key={preset.label}
+                      type="button"
+                      onClick={() => {
+                        setMinScore(preset.min);
+                        setMaxScore(preset.max);
+                        setEligibilityFilter(preset.filter);
+                      }}
+                      className={`px-2 py-1 text-[10px] font-mono-telemetry rounded transition-all ${
+                        isActive
+                          ? "bg-[#e8342a] text-white font-bold shadow-sm"
+                          : "bg-[#201f22] text-[#8e8c90] hover:text-white border border-[#353437] hover:border-[#8e8c90]"
+                      }`}
+                    >
+                      {preset.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
